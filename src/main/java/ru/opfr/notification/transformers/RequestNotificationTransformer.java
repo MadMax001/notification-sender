@@ -21,7 +21,7 @@ public class RequestNotificationTransformer {
         notification.setType(NotificationTypeDictionary.of(request.type));
         notification.setPerson(createPerson(request));
         notification.setRemoteId(request.id);
-
+        notification.setTheme(request.theme);
         return notification;
     }
 

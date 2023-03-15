@@ -26,6 +26,7 @@ class RequestNotificationTransformerTest {
         dto.ip = "10.12.13.14";
         dto.email = "user@server.ru";
         dto.content = "Content";
+        dto.theme = "theme";
         Notification notification = transformer.transform(dto);
 
         assertNotNull(notification);
@@ -35,6 +36,7 @@ class RequestNotificationTransformerTest {
         assertEquals(dto.ip, notification.getPerson().getIp());
         assertEquals(dto.email, notification.getPerson().getEmail());
         assertEquals(dto.content, notification.getContent());
+        assertEquals(dto.theme, notification.getTheme());
         assertEquals(NotificationTypeDictionary.of(dto.type), notification.getType());
         assertEquals(0, notification.getStages().size());
         assertNull(notification.getCreated());
@@ -55,6 +57,7 @@ class RequestNotificationTransformerTest {
         dto.ip = "10.12.13.14";
         dto.email = "user@server.ru";
         dto.content = "Content";
+        dto.theme = "Theme";
 
         Notification notification = transformer.transform(dto);
         assertNull(notification.getType());
@@ -69,6 +72,7 @@ class RequestNotificationTransformerTest {
         dto.ip = "10.12.13.14";
         dto.email = "user@server.ru";
         dto.content = "Content";
+        dto.theme = "Theme";
 
         Notification notification = transformer.transform(dto);
         assertNull(notification.getType());

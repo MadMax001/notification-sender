@@ -40,6 +40,7 @@ class NotificationRepositoryTest {
         notification.setPerson(modelPerson);
         notification.addStage(stage);
         notification.setContent("Test content \nthe second line");
+        notification.setTheme("Theme");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
@@ -50,6 +51,7 @@ class NotificationRepositoryTest {
 
         assertNotNull(dbNotification);
         assertEquals(notification.getContent(), dbNotification.getContent());
+        assertEquals(notification.getTheme(), dbNotification.getTheme());
         assertEquals(notification.getRemoteId(), dbNotification.getRemoteId());
         assertEquals(notification.getType().toString().toLowerCase(), dbNotification.getType().toString().toLowerCase());
 
@@ -106,6 +108,7 @@ class NotificationRepositoryTest {
         notification1.setType(MESSAGE);
         notification1.setPerson(modelPerson1);
         notification1.setContent("Test content \nthe second line");
+        notification1.setTheme("Theme");
         notification1.setRemoteId("test-remote-id");
         notification1.addStage(stage);
         notificationRepository.save(notification1);
@@ -122,6 +125,7 @@ class NotificationRepositoryTest {
         dbNotification.setType(EMAIL);
         dbNotification.setPerson(modelPerson2);
         dbNotification.setContent("Test content2");
+        dbNotification.setTheme("Modified theme");
         dbNotification.setRemoteId("test-remote2-id");
         notificationRepository.save(dbNotification);
         entityManager.flush();
@@ -130,6 +134,7 @@ class NotificationRepositoryTest {
 
         assertNotNull(dbUpdatedNotification);
         assertEquals(dbNotification.getContent(), dbUpdatedNotification.getContent());
+        assertEquals(dbNotification.getTheme(), dbUpdatedNotification.getTheme());
         assertEquals(dbNotification.getRemoteId(), dbUpdatedNotification.getRemoteId());
         assertEquals(dbNotification.getType().toString().toLowerCase(), dbUpdatedNotification.getType().toString().toLowerCase());
         assertEquals(dbNotification.getPerson().getEmail(), dbUpdatedNotification.getPerson().getEmail());

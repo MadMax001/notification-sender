@@ -270,6 +270,7 @@ class SendNotificationFacadeTest {
         request.ip = "10.12.13.14";
         request.email = "user@server.ru";
         request.content = "Content";
+        request.theme = "Theme";
         return request;
 
     }

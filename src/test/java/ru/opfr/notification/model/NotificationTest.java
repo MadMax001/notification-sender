@@ -28,6 +28,7 @@ class NotificationTest {
 
         notification.setId(5L);
         notification.setContent("content");
+        notification.setTheme("Theme");
         notification.setPerson(person);
         notification.setCreated(creationTime);
         notification.setUpdated(updateTime);
@@ -37,6 +38,7 @@ class NotificationTest {
 
         assertEquals(5L, notification.getId());
         assertEquals("content", notification.getContent());
+        assertEquals("Theme", notification.getTheme());
         assertEquals("10.11.12.13", notification.getPerson().getIp());
         assertEquals("073User", notification.getPerson().getUser());
         assertEquals("email@server.ru", notification.getPerson().getEmail());

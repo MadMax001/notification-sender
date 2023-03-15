@@ -8,4 +8,5 @@ public class Request {
     public String ip;
     public String email;
     public String content;
+    public String theme;
 }

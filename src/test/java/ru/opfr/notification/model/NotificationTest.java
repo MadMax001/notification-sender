@@ -27,7 +27,7 @@ class NotificationTest {
         List<NotificationStage> stagesList = Arrays.asList(stage1, stage2);
 
         notification.setId(5L);
-        notification.setMessage("content");
+        notification.setContent("content");
         notification.setPerson(person);
         notification.setCreated(creationTime);
         notification.setUpdated(updateTime);
@@ -36,7 +36,7 @@ class NotificationTest {
         notification.setType(EMAIL);
 
         assertEquals(5L, notification.getId());
-        assertEquals("content", notification.getMessage());
+        assertEquals("content", notification.getContent());
         assertEquals("10.11.12.13", notification.getPerson().getIp());
         assertEquals("073User", notification.getPerson().getUser());
         assertEquals("email@server.ru", notification.getPerson().getEmail());

@@ -12,7 +12,7 @@ CREATE TABLE notification.notification (
    type VARCHAR(255) not null,
    updated TIMESTAMP,
    created TIMESTAMP,
-   message TEXT,
+   content TEXT,
    person_user VARCHAR(255),
    person_ip VARCHAR(255),
    person_email VARCHAR(255),

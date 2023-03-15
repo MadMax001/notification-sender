@@ -34,7 +34,7 @@ class RequestNotificationTransformerTest {
         assertEquals(dto.user, notification.getPerson().getUser());
         assertEquals(dto.ip, notification.getPerson().getIp());
         assertEquals(dto.email, notification.getPerson().getEmail());
-        assertEquals(dto.content, notification.getMessage());
+        assertEquals(dto.content, notification.getContent());
         assertEquals(NotificationTypeDictionary.of(dto.type), notification.getType());
         assertEquals(0, notification.getStages().size());
         assertNull(notification.getCreated());

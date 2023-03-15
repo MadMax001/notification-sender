@@ -39,7 +39,7 @@ class NotificationRepositoryTest {
         notification.setType(MESSAGE);
         notification.setPerson(modelPerson);
         notification.addStage(stage);
-        notification.setMessage("Test content \nthe second line");
+        notification.setContent("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
@@ -49,7 +49,7 @@ class NotificationRepositoryTest {
         assertNotNull(notification.getId());
 
         assertNotNull(dbNotification);
-        assertEquals(notification.getMessage(), dbNotification.getMessage());
+        assertEquals(notification.getContent(), dbNotification.getContent());
         assertEquals(notification.getRemoteId(), dbNotification.getRemoteId());
         assertEquals(notification.getType().toString().toLowerCase(), dbNotification.getType().toString().toLowerCase());
 
@@ -84,7 +84,7 @@ class NotificationRepositoryTest {
         Notification notification = new Notification();
         notification.setType(MESSAGE);
         notification.setPerson(modelPerson);
-        notification.setMessage("Test content \nthe second line");
+        notification.setContent("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notification.addStage(stage);
         notificationRepository.save(notification);
@@ -105,7 +105,7 @@ class NotificationRepositoryTest {
         Notification notification1 = new Notification();
         notification1.setType(MESSAGE);
         notification1.setPerson(modelPerson1);
-        notification1.setMessage("Test content \nthe second line");
+        notification1.setContent("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
         notification1.addStage(stage);
         notificationRepository.save(notification1);
@@ -121,7 +121,7 @@ class NotificationRepositoryTest {
         modelPerson2.setEmail("user2@server2.ru");
         dbNotification.setType(EMAIL);
         dbNotification.setPerson(modelPerson2);
-        dbNotification.setMessage("Test content2");
+        dbNotification.setContent("Test content2");
         dbNotification.setRemoteId("test-remote2-id");
         notificationRepository.save(dbNotification);
         entityManager.flush();
@@ -129,7 +129,7 @@ class NotificationRepositoryTest {
         Notification dbUpdatedNotification = notificationRepository.findById(id).orElse(null);
 
         assertNotNull(dbUpdatedNotification);
-        assertEquals(dbNotification.getMessage(), dbUpdatedNotification.getMessage());
+        assertEquals(dbNotification.getContent(), dbUpdatedNotification.getContent());
         assertEquals(dbNotification.getRemoteId(), dbUpdatedNotification.getRemoteId());
         assertEquals(dbNotification.getType().toString().toLowerCase(), dbUpdatedNotification.getType().toString().toLowerCase());
         assertEquals(dbNotification.getPerson().getEmail(), dbUpdatedNotification.getPerson().getEmail());
@@ -159,7 +159,7 @@ class NotificationRepositoryTest {
         Notification notification1 = new Notification();
         notification1.setType(MESSAGE);
         notification1.setPerson(modelPerson1);
-        notification1.setMessage("Test content \nthe second line");
+        notification1.setContent("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
         notification1.addStage(stage1);
         notificationRepository.save(notification1);
@@ -206,7 +206,7 @@ class NotificationRepositoryTest {
         Notification notification1 = new Notification();
         notification1.setType(MESSAGE);
         notification1.setPerson(modelPerson1);
-        notification1.setMessage("Test content \nthe second line");
+        notification1.setContent("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
         notification1.addStage(stage1);
         notification1.addStage(stage2);

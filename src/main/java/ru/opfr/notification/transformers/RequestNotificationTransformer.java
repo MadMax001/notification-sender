@@ -17,7 +17,7 @@ public class RequestNotificationTransformer {
         checkForNullRequest(request);
 
         Notification notification = new Notification();
-        notification.setContent(request.content);
+        notification.setMessage(request.content);
         notification.setType(NotificationTypeDictionary.of(request.type));
         notification.setPerson(createPerson(request));
         notification.setRemoteId(request.id);

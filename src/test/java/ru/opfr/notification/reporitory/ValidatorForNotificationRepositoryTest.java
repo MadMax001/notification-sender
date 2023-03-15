@@ -35,7 +35,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(null);
         notification1.addStage(getStageForReceiving());
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Test content \nthe second line");
+        notification1.setMessage("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -51,7 +51,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(EMAIL);
         notification1.setStages(null);
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Test content \nthe second line");
+        notification1.setMessage("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -65,7 +65,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(EMAIL);
         notification1.setStages(Collections.emptyList());
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Test content \nthe second line");
+        notification1.setMessage("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -81,7 +81,7 @@ class ValidatorForNotificationRepositoryTest {
         stage.setStage(null);
         notification1.addStage(stage);
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Test content \nthe second line");
+        notification1.setMessage("Test content \nthe second line");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -95,7 +95,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(EMAIL);
         notification1.addStage(getStageForReceiving());
         notification1.setPerson(modelPerson1);
-        notification1.setContent(null);
+        notification1.setMessage(null);
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -112,7 +112,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(MESSAGE);
         notification1.addStage(getStageForReceiving());
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Content");
+        notification1.setMessage("Content");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -128,7 +128,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(MESSAGE);
         notification1.addStage(getStageForReceiving());
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Content");
+        notification1.setMessage("Content");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -143,7 +143,7 @@ class ValidatorForNotificationRepositoryTest {
         notification.setType(MESSAGE);
         notification.addStage(getStageForReceiving());
         notification.setPerson(modelPerson);
-        notification.setContent("Test content \nthe second line");
+        notification.setMessage("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
@@ -161,7 +161,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(EMAIL);
         notification1.addStage(getStageForReceiving());
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Content");
+        notification1.setMessage("Content");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -177,7 +177,7 @@ class ValidatorForNotificationRepositoryTest {
         notification.setType(EMAIL);
         notification.addStage(getStageForReceiving());
         notification.setPerson(modelPerson);
-        notification.setContent("Test content \nthe second line");
+        notification.setMessage("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
@@ -196,7 +196,7 @@ class ValidatorForNotificationRepositoryTest {
         notification.setType(EMAIL);
         notification.addStage(getStageForReceiving());
         notification.setPerson(modelPerson);
-        notification.setContent("Test content \nthe second line");
+        notification.setMessage("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
@@ -215,7 +215,7 @@ class ValidatorForNotificationRepositoryTest {
         notification1.setType(FILE);
         notification1.addStage(getStageForReceiving());
         notification1.setPerson(modelPerson1);
-        notification1.setContent("Content");
+        notification1.setMessage("Content");
         notification1.setRemoteId("test-remote-id");
 
         notificationRepository.save(notification1);
@@ -232,7 +232,7 @@ class ValidatorForNotificationRepositoryTest {
         notification.setType(FILE);
         notification.addStage(getStageForReceiving());
         notification.setPerson(modelPerson);
-        notification.setContent("Test content \nthe second line");
+        notification.setMessage("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
@@ -251,7 +251,7 @@ class ValidatorForNotificationRepositoryTest {
         notification.setType(FILE);
         notification.addStage(getStageForReceiving());
         notification.setPerson(modelPerson);
-        notification.setContent("Test content \nthe second line");
+        notification.setMessage("Test content \nthe second line");
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();

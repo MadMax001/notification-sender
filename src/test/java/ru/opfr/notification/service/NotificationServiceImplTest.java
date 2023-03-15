@@ -51,7 +51,7 @@ class NotificationServiceImplTest {
 
         Notification notification = new Notification();
         notification.setRemoteId("remote-id");
-        notification.setContent("Content");
+        notification.setMessage("Content");
         notification.setType(EMAIL);
 
         Person person = new Person();
@@ -97,7 +97,7 @@ class NotificationServiceImplTest {
 
         Notification notification = new Notification();
         notification.setRemoteId("remote-id");
-        notification.setContent("Content");
+        notification.setMessage("Content");
         notification.setType(EMAIL);
 
         Person person = new Person();

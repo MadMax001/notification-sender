@@ -267,7 +267,7 @@ class SendNotificationFacadeTest {
         request.type = type.toString();
         request.id = modelRequestId;
         request.user = "073User";
-        request.ip = "10.12.13.14";
+        request.ip = "10.73.13.14";
         request.email = "user@server.ru";
         request.content = "Content";
         request.theme = "Theme";

@@ -18,7 +18,7 @@ class NotificationTest {
         Notification notification = new Notification();
 
         Person person = new Person();
-        person.setIp("10.11.12.13");
+        person.setIp("10.73.12.13");
         person.setUser("073User");
         person.setEmail("email@server.ru");
 
@@ -39,7 +39,7 @@ class NotificationTest {
         assertEquals(5L, notification.getId());
         assertEquals("content", notification.getContent());
         assertEquals("Theme", notification.getTheme());
-        assertEquals("10.11.12.13", notification.getPerson().getIp());
+        assertEquals("10.73.12.13", notification.getPerson().getIp());
         assertEquals("073User", notification.getPerson().getUser());
         assertEquals("email@server.ru", notification.getPerson().getEmail());
         assertEquals(creationTime, notification.getCreated());

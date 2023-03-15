@@ -5,15 +5,23 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Embeddable;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.util.Objects;
+
+import static ru.opfr.notification.ApplicationConstants.*;
 
 @Embeddable
 @NoArgsConstructor
 @Getter
 @Setter
 public class Person {
+    @Size(max=255, message = MAX_LENGTH_USER)
     private String user;
+    @Pattern(regexp = "^$|(^10\\.73\\.(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])$)", message = WRONG_IP)
     private String ip;
+    @Size(max=255, message = MAX_LENGTH_EMAIL)
+    @Pattern(regexp = "^$|(^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$)", message = WRONG_EMAIL)
     private String email;
 
     @Override

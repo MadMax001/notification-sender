@@ -23,7 +23,7 @@ class RequestNotificationTransformerTest {
         dto.type = NotificationTypeDictionary.EMAIL.toString();
         dto.id = "remote-id";
         dto.user = "073User";
-        dto.ip = "10.12.13.14";
+        dto.ip = "10.73.13.14";
         dto.email = "user@server.ru";
         dto.content = "Content";
         dto.theme = "theme";
@@ -54,7 +54,7 @@ class RequestNotificationTransformerTest {
         dto.type = "aaa";
         dto.id = "remote-id";
         dto.user = "073User";
-        dto.ip = "10.12.13.14";
+        dto.ip = "10.73.13.14";
         dto.email = "user@server.ru";
         dto.content = "Content";
         dto.theme = "Theme";
@@ -69,7 +69,7 @@ class RequestNotificationTransformerTest {
         dto.type = NotificationTypeDictionary.EMAIL.toString().toLowerCase();
         dto.id = "remote-id";
         dto.user = "073User";
-        dto.ip = "10.12.13.14";
+        dto.ip = "10.73.13.14";
         dto.email = "user@server.ru";
         dto.content = "Content";
         dto.theme = "Theme";

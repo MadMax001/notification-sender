@@ -56,7 +56,7 @@ class NotificationServiceImplTest {
 
         Person person = new Person();
         person.setUser("073User");
-        person.setIp("10.12.13.14");
+        person.setIp("10.73.13.14");
         person.setEmail("user@server.ru");
         notification.setPerson(person);
 
@@ -102,7 +102,7 @@ class NotificationServiceImplTest {
 
         Person person = new Person();
         person.setUser("073User");
-        person.setIp("10.12.13.14");
+        person.setIp("10.73.13.14");
         person.setEmail("user@server.ru");
         notification.setPerson(person);
 

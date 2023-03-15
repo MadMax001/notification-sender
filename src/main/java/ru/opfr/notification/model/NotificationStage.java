@@ -6,10 +6,12 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static javax.persistence.FetchType.LAZY;
+import static ru.opfr.notification.ApplicationConstants.MAX_LENGTH_STAGE_MESSAGE;
 
 @Getter
 @Setter
@@ -31,6 +33,7 @@ public class NotificationStage {
     @NotNull(message = "stage can't be null")
     private NotificationProcessStageDictionary stage;
 
+    @Size(max=255, message = MAX_LENGTH_STAGE_MESSAGE)
     private String message;
 
     private LocalDateTime created;

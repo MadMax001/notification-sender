@@ -3,19 +3,20 @@ package ru.opfr.notification.model;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.opfr.notification.ApplicationConstants;
 import ru.opfr.notification.constraint.NotEmptyCollection;
 import ru.opfr.notification.constraint.NotNullByType;
 
 import javax.persistence.*;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static javax.persistence.FetchType.LAZY;
+import static ru.opfr.notification.ApplicationConstants.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.*;
 
 @Getter
@@ -23,9 +24,9 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.*;
 @NoArgsConstructor
 @Entity
 @Table(name = "notification", schema = "notification")
-@NotNullByType(field = "person.user", type = MESSAGE, message = ApplicationConstants.NULL_USER)
-@NotNullByType(field = "person.ip", type = MESSAGE, message = ApplicationConstants.NULL_IP)
-@NotNullByType(field = "person.email", types = {EMAIL, FILE}, message = ApplicationConstants.NULL_EMAIL)
+@NotNullByType(field = "person.user", type = MESSAGE, message = NULL_USER)
+@NotNullByType(field = "person.ip", type = MESSAGE, message = NULL_IP)
+@NotNullByType(field = "person.email", types = {EMAIL, FILE}, message = NULL_EMAIL)
 public class Notification {
     @Id
 //    @GeneratedValue(strategy = GenerationType.AUTO)
@@ -33,13 +34,15 @@ public class Notification {
     @SequenceGenerator(name="notification_sequence", sequenceName = "notification.notification_sequence", allocationSize = 1)
     private Long id;
 
+
+    @Size(max=255, message = MAX_LENGTH_REMOTE_ID)
     private String remoteId;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = ApplicationConstants.NULL_TYPE)
+    @NotNull(message = NULL_TYPE)
     private NotificationTypeDictionary type;
 
-    @NotEmptyCollection(message = ApplicationConstants.NO_STAGES)
+    @NotEmptyCollection(message = NO_STAGES)
     @OneToMany(fetch = LAZY, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationStage> stages = new ArrayList<>();
 
@@ -54,9 +57,10 @@ public class Notification {
     @Valid
     private Person person;
 
-    @NotNull(message = ApplicationConstants.NULL_CONTENT)
+    @NotNull(message = NULL_CONTENT)
     private String content;
 
+    @Size(max=255, message = MAX_LENGTH_THEME)
     private String theme;
 
     @PrePersist

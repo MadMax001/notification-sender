@@ -29,7 +29,7 @@ class NotificationRepositoryTest {
     void persistNotificationWithoutStages_AndGetItByIdAfterFlush_AndCheckForNonNullCreatedField() {
         Person modelPerson = new Person();
         modelPerson.setUser("073User");
-        modelPerson.setIp("10.11.12.13");
+        modelPerson.setIp("10.73.12.13");
         modelPerson.setEmail("user@server.ru");
 
         NotificationStage stage = new NotificationStage();
@@ -77,7 +77,7 @@ class NotificationRepositoryTest {
     void persistNotification_AndGetByAnotherId() {
         Person modelPerson = new Person();
         modelPerson.setUser("073User");
-        modelPerson.setIp("10.11.12.13");
+        modelPerson.setIp("10.73.12.13");
         modelPerson.setEmail("user@server.ru");
 
         NotificationStage stage = new NotificationStage();
@@ -99,7 +99,7 @@ class NotificationRepositoryTest {
     void updateNotification_WithFlushBetweenTwoPersistOperations_AndCheckCreatedAndUpdatedFields() {
         Person modelPerson1 = new Person();
         modelPerson1.setUser("073User");
-        modelPerson1.setIp("10.11.12.13");
+        modelPerson1.setIp("10.73.12.13");
         modelPerson1.setEmail("user@server.ru");
         NotificationStage stage = new NotificationStage();
         stage.setStage(RECEIVED);
@@ -120,7 +120,7 @@ class NotificationRepositoryTest {
 
         Person modelPerson2 = new Person();
         modelPerson2.setUser("073User2");
-        modelPerson2.setIp("14.15.16.17");
+        modelPerson2.setIp("10.73.16.17");
         modelPerson2.setEmail("user2@server2.ru");
         dbNotification.setType(EMAIL);
         dbNotification.setPerson(modelPerson2);
@@ -152,7 +152,7 @@ class NotificationRepositoryTest {
     void persistNotificationWIthOneStage_ThenUpdateNotificationByAddingAnotherStage_AndCheckForNullStagesFields() {
         Person modelPerson1 = new Person();
         modelPerson1.setUser("073User");
-        modelPerson1.setIp("10.11.12.13");
+        modelPerson1.setIp("10.73.12.13");
         modelPerson1.setEmail("user@server.ru");
 
         NotificationStage stage1 = new NotificationStage();
@@ -199,7 +199,7 @@ class NotificationRepositoryTest {
     void persistNotificationWithTwoStages_ThenDeleteNotification_AndTryToFindNotificationAndStagesByIds() {
         Person modelPerson1 = new Person();
         modelPerson1.setUser("073User");
-        modelPerson1.setIp("10.11.12.13");
+        modelPerson1.setIp("10.73.12.13");
         modelPerson1.setEmail("user@server.ru");
 
         NotificationStage stage1 = new NotificationStage();

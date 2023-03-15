@@ -15,7 +15,7 @@ CREATE TABLE notification.notification (
    content TEXT,
    theme VARCHAR(255),
    person_user VARCHAR(255),
-   person_ip VARCHAR(255),
+   person_ip VARCHAR(15),
    person_email VARCHAR(255),
    CONSTRAINT pk_notification PRIMARY KEY (id)
 );

@@ -20,8 +20,9 @@ import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.*;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
-import ru.opfr.notification.transformers.RequestNotificationTransformer;
+import ru.opfr.notification.transformers.RequestNotificationTransformerImpl;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -43,7 +44,7 @@ class SendNotificationFacadeTest {
     @SpyBean
     private final NotificationStageService notificationStageService;
     @SpyBean
-    private final RequestNotificationTransformer requestNotificationTransformer;
+    private final RequestNotificationTransformerImpl requestNotificationTransformer;
     private final Map<NotificationTypeDictionary, SenderService> senderServiceMap;
 
     private SendNotificationFacade facade;
@@ -64,7 +65,7 @@ class SendNotificationFacadeTest {
     }
 
     @Test
-    void sendRequest_WithSuccessfulSendOperation_AndGetSuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+    void sendRequest_WithSuccessfulSendOperation_AndGetSuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException, IOException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
@@ -110,7 +111,7 @@ class SendNotificationFacadeTest {
     }
 
     @Test
-    void sendRequest_WithUnsuccessfulSendOperation_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+    void sendRequest_WithUnsuccessfulSendOperation_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException, IOException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
@@ -156,7 +157,7 @@ class SendNotificationFacadeTest {
     }
 
     @Test
-    void sendRequestWithNullRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
+    void sendRequestWithNullRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException, IOException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
@@ -186,7 +187,7 @@ class SendNotificationFacadeTest {
     }
 
     @Test
-    void sendRequestWithWrongRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
+    void sendRequestWithWrongRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException, IOException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
@@ -220,7 +221,7 @@ class SendNotificationFacadeTest {
     }
 
     @Test
-    void sendRequest_AndThrowExceptionInSendProcess_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
+    void sendRequest_AndThrowExceptionInSendProcess_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException, IOException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
 
         String messageException = "message!!!";

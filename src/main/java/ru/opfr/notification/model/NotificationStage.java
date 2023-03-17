@@ -20,8 +20,8 @@ import static ru.opfr.notification.ApplicationConstants.MAX_LENGTH_STAGE_MESSAGE
 @Table(name = "notification_stage", schema = "notification")
 public class NotificationStage {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_sequence")
-    @SequenceGenerator(name="notification_sequence", sequenceName = "notification.notification_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stage_sequence")
+    @SequenceGenerator(name="stage_sequence", sequenceName = "notification.stage_sequence", allocationSize = 1)
     private Long id;
 
     @ManyToOne(fetch = LAZY)
@@ -31,7 +31,7 @@ public class NotificationStage {
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "stage can't be null")
-    private NotificationProcessStageDictionary stage;
+    private NotificationProcessStageDictionary stage;                       //todo to ApplicationConstants
 
     @Size(max=255, message = MAX_LENGTH_STAGE_MESSAGE)
     private String message;

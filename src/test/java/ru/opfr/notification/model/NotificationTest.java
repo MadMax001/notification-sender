@@ -67,4 +67,20 @@ class NotificationTest {
             assertEquals(notification, stage.getNotification());
 
     }
+
+    @Test
+    void addAttachmentAndAssertAttachmentsList() {
+        Notification notification = new Notification();
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        notification.addAttachment(attachment1);
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        notification.addAttachment(attachment2);
+        List<NotificationAttachment> attachments = Arrays.asList(attachment1, attachment2);
+
+        assertIterableEquals(attachments, notification.getAttachments());
+        for (NotificationAttachment attachment : notification.getAttachments()) {
+            assertEquals(notification, attachment.getNotification());
+        }
+
+    }
 }

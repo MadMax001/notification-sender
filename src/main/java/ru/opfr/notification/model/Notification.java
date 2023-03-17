@@ -63,6 +63,9 @@ public class Notification {
     @Size(max=255, message = MAX_LENGTH_THEME)
     private String theme;
 
+    @OneToMany(fetch = LAZY, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificationAttachment> attachments = new ArrayList<>();
+
     @PrePersist
     private void onCreate() {
         created = LocalDateTime.now();
@@ -78,6 +81,11 @@ public class Notification {
         this.stages.add(stage);
     }
 
+    public void addAttachment(NotificationAttachment attachment) {
+        attachment.setNotification(this);
+        this.attachments.add(attachment);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -90,4 +98,5 @@ public class Notification {
     public int hashCode() {
         return Objects.hash(id, remoteId, type, stages, updated, created, person, content, theme);
     }
+
 }

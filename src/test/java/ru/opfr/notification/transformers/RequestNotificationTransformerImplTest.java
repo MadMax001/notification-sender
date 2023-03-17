@@ -2,23 +2,29 @@ package ru.opfr.notification.transformers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
 import ru.opfr.notification.model.dto.Request;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.io.IOException;
+import java.util.Collections;
 
-class RequestNotificationTransformerTest {
-    private RequestNotificationTransformer transformer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class RequestNotificationTransformerImplTest {
+    private RequestNotificationTransformerImpl transformer;
 
     @BeforeEach
     void setUp() {
-        transformer = new RequestNotificationTransformer();
+        transformer = new RequestNotificationTransformerImpl(new RequestFileTransformerImpl());
     }
 
     @Test
-    void createEntityFromDTO_WithAllNonNullFields() throws CreationNotificationException {
+    void createEntityFromDTO_WithAllNonNullFields() throws CreationNotificationException, IOException {
         Request dto = new Request();
         dto.type = NotificationTypeDictionary.EMAIL.toString();
         dto.id = "remote-id";
@@ -39,6 +45,7 @@ class RequestNotificationTransformerTest {
         assertEquals(dto.theme, notification.getTheme());
         assertEquals(NotificationTypeDictionary.of(dto.type), notification.getType());
         assertEquals(0, notification.getStages().size());
+        assertIterableEquals(Collections.emptyList(), notification.getAttachments());
         assertNull(notification.getCreated());
         assertNull(notification.getUpdated());
     }
@@ -49,7 +56,7 @@ class RequestNotificationTransformerTest {
     }
 
     @Test
-    void createEntityWithWrongType_andGetNotificationWithNullType() throws CreationNotificationException {
+    void createEntityWithWrongType_andGetNotificationWithNullType() throws CreationNotificationException, IOException {
         Request dto = new Request();
         dto.type = "aaa";
         dto.id = "remote-id";
@@ -64,7 +71,7 @@ class RequestNotificationTransformerTest {
     }
 
     @Test
-    void createEntityWithTypeToLowerCase_andGetNotificationWithNullType() throws CreationNotificationException {
+    void createEntityWithTypeToLowerCase_andGetNotificationWithNullType() throws CreationNotificationException, IOException {
         Request dto = new Request();
         dto.type = NotificationTypeDictionary.EMAIL.toString().toLowerCase();
         dto.id = "remote-id";
@@ -76,5 +83,28 @@ class RequestNotificationTransformerTest {
 
         Notification notification = transformer.transform(dto);
         assertNull(notification.getType());
+    }
+
+    @Test
+    void createEntityWithAttachedFiles() throws CreationNotificationException, IOException {
+        Request dto = new Request();
+        dto.type = NotificationTypeDictionary.EMAIL.toString();
+        dto.id = "remote-id";
+        dto.email = "user@server.ru";
+        dto.content = "Content";
+        dto.theme = "theme";
+        MultipartFile[] files = {
+                new MockMultipartFile("file1", "file1", null, "Content number 1".getBytes()),
+                new MockMultipartFile("file2", "file2", null, "Content number 2".getBytes()),
+        };
+        dto.files = files;
+        Notification notificationWithFiles = transformer.transform(dto);
+
+        assertNotNull(notificationWithFiles);
+        assertEquals(2, notificationWithFiles.getAttachments().size());
+        assertEquals("file1", notificationWithFiles.getAttachments().get(0).getName());
+        assertArrayEquals("Content number 1".getBytes(), notificationWithFiles.getAttachments().get(0).getContent());
+        assertEquals("file2", notificationWithFiles.getAttachments().get(1).getName());
+        assertArrayEquals("Content number 2".getBytes(), notificationWithFiles.getAttachments().get(1).getContent());
     }
 }

@@ -9,8 +9,9 @@ import ru.opfr.notification.model.NotificationProcessStageDictionary;
 import ru.opfr.notification.model.NotificationTypeDictionary;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
-import ru.opfr.notification.transformers.RequestNotificationTransformer;
+import ru.opfr.notification.transformers.RequestNotificationTransformerImpl;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,18 +24,18 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
     private final NotificationService notificationService;
     private final NotificationStageService notificationStageService;
     private final Map<NotificationTypeDictionary, SenderService> sendersMap;
-    private final RequestNotificationTransformer requestNotificationTransformer;
+    private final RequestNotificationTransformerImpl requestNotificationTransformer;
 
     @Override
     public Response sendNotificationByRequest(Request request) {
         try {
             return sendNotificationWorkflow(request);
-        } catch (SendNotificationException | CreationNotificationException e) {
+        } catch (SendNotificationException | CreationNotificationException | IOException e) {
             return failResponseByThrowable(e, request);
         }
     }
 
-    private Response sendNotificationWorkflow(Request request) throws CreationNotificationException, SendNotificationException {
+    private Response sendNotificationWorkflow(Request request) throws CreationNotificationException, SendNotificationException, IOException {
         Notification notification = saveNotificationByRequest(request);
         SenderService service = sendersMap.get(notification.getType());
         boolean success = service.send(notification);
@@ -48,7 +49,7 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
                 .build();
     }
 
-    private Notification saveNotificationByRequest(Request request) throws CreationNotificationException {
+    private Notification saveNotificationByRequest(Request request) throws CreationNotificationException, IOException {
         Notification notification = requestNotificationTransformer.transform(request);
         saveNotificationWithNewStageAdding(notification, RECEIVED);
         return notification;

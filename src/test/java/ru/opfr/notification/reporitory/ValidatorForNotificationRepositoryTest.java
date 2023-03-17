@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import ru.opfr.notification.model.Notification;
+import ru.opfr.notification.model.NotificationAttachment;
 import ru.opfr.notification.model.NotificationStage;
 import ru.opfr.notification.model.Person;
 
@@ -271,6 +272,7 @@ class ValidatorForNotificationRepositoryTest {
 
         }
 
+        @Test
         void persistNotificationWithEmptyTheme() {
             Person person = getPersonWithAllFields();
             Notification notification = new Notification();
@@ -286,6 +288,7 @@ class ValidatorForNotificationRepositoryTest {
             assertNotNull(savedNotification);
         }
 
+        @Test
         void persistNotificationWithThemeWithLengthMoreThan255_AndThrowException() {
             Person person = getPersonWithAllFields();
             Notification notification = new Notification();
@@ -711,7 +714,7 @@ class ValidatorForNotificationRepositoryTest {
 
     @Nested
     class InnerFieldsInStageValidation {
-        Notification storedNotification;
+        ThreadLocal<Notification> storedNotification;
         @BeforeEach
         void setUp() {
             Person person = getPersonWithAllFields();
@@ -726,15 +729,18 @@ class ValidatorForNotificationRepositoryTest {
             Notification savedNotification = notificationRepository.save(notification);
             entityManager.flush();
             assertNotNull(savedNotification);
-            storedNotification = notification;
+            storedNotification = new ThreadLocal<>();
+            storedNotification.set(notification);
+
         }
 
         @Test
         void addNotificationStageWithNullMessage() {
-            Notification notification = notificationRepository.findById(storedNotification.getId()).orElse(null);
+            Notification notification = notificationRepository.findById(storedNotification.get().getId()).orElse(null);
             NotificationStage stage = new NotificationStage();
             stage.setStage(RECEIVED);
             stage.setMessage(null);
+            assertNotNull(notification);
             notification.addStage(stage);
 
             Notification savedNotification = notificationRepository.save(notification);
@@ -745,10 +751,11 @@ class ValidatorForNotificationRepositoryTest {
 
         @Test
         void addNotificationStageWithEmptyMessage() {
-            Notification notification = notificationRepository.findById(storedNotification.getId()).orElse(null);
+            Notification notification = notificationRepository.findById(storedNotification.get().getId()).orElse(null);
             NotificationStage stage = new NotificationStage();
             stage.setStage(RECEIVED);
             stage.setMessage("");
+            assertNotNull(notification);
             notification.addStage(stage);
             Notification savedNotification = notificationRepository.save(notification);
             entityManager.flush();
@@ -757,7 +764,7 @@ class ValidatorForNotificationRepositoryTest {
 
         @Test
         void addNotificationStageWithMessage_WithLengthMoreThan255_AndThrowException() {
-            Notification notification = notificationRepository.findById(storedNotification.getId()).orElse(null);
+            Notification notification = notificationRepository.findById(storedNotification.get().getId()).orElse(null);
             NotificationStage stage = new NotificationStage();
             stage.setStage(RECEIVED);
             stage.setMessage("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
@@ -765,6 +772,7 @@ class ValidatorForNotificationRepositoryTest {
                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
                     "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            assertNotNull(notification);
             notification.addStage(stage);
 
             notificationRepository.save(notification);
@@ -773,15 +781,68 @@ class ValidatorForNotificationRepositoryTest {
 
         @Test
         void addNotificationStageWithNullStageType_AndThrowException() {
-            Notification notification = notificationRepository.findById(storedNotification.getId()).orElse(null);
+            Notification notification = notificationRepository.findById(storedNotification.get().getId()).orElse(null);
             NotificationStage stage = new NotificationStage();
             stage.setStage(null);
+            assertNotNull(notification);
             notification.addStage(stage);
 
             notificationRepository.save(notification);
             assertThrows(ConstraintViolationException.class, entityManager::flush);
         }
 
+    }
+
+    @Nested
+    class InnerFieldsInAttachmentValidation {
+        ThreadLocal<Notification> storedNotification;
+        @BeforeEach
+        void setUp() {
+            Person person = getPersonWithAllFields();
+            Notification notification = new Notification();
+            notification.setTheme("Theme");
+            notification.setContent("Content");
+            notification.setPerson(person);
+            notification.setType(EMAIL);
+            NotificationStage stage = new NotificationStage();
+            stage.setStage(RECEIVED);
+            notification.addStage(stage);
+            Notification savedNotification = notificationRepository.save(notification);
+            entityManager.flush();
+            assertNotNull(savedNotification);
+            storedNotification = new ThreadLocal<>();
+            storedNotification.set(notification);
+        }
+
+        @Test
+        void persistToAddFileWithNullFilename_AntThrowException() {
+            Notification notification = notificationRepository.findById(storedNotification.get().getId()).orElse(null);
+            assertNotNull(notification);
+            NotificationAttachment attachment1 = new NotificationAttachment();
+            attachment1.setName(null);
+            attachment1.setContent("Content number 1".getBytes());
+            notification.addAttachment(attachment1);
+
+            notificationRepository.save(notification);
+            assertThrows(ConstraintViolationException.class, entityManager::flush);
+        }
+
+        @Test
+        void persistToAddFileWithFilename_WithLengthMoreThan255_AntThrowException() {
+            Notification notification = notificationRepository.findById(storedNotification.get().getId()).orElse(null);
+            assertNotNull(notification);
+            NotificationAttachment attachment1 = new NotificationAttachment();
+            attachment1.setName("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" +
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+            attachment1.setContent("Content number 1".getBytes());
+            notification.addAttachment(attachment1);
+
+            notificationRepository.save(notification);
+            assertThrows(ConstraintViolationException.class, entityManager::flush);
+        }
     }
 
 

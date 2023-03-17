@@ -83,4 +83,22 @@ class NotificationTest {
         }
 
     }
+
+    @Test
+    void clearAttachments() {
+        Notification notification = new Notification();
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        notification.addAttachment(attachment1);
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        notification.addAttachment(attachment2);
+
+        assertNotNull(attachment1.getNotification());
+        assertNotNull(attachment2.getNotification());
+
+        notification.clearAttachments();
+
+        assertIterableEquals(Collections.emptyList(), notification.getAttachments());
+        assertNull(attachment1.getNotification());
+        assertNull(attachment2.getNotification());
+    }
 }

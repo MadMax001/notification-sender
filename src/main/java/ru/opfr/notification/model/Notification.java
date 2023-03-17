@@ -86,6 +86,13 @@ public class Notification {
         this.attachments.add(attachment);
     }
 
+    public void clearAttachments() {
+        for (NotificationAttachment attachment : this.attachments) {
+            attachment.setNotification(null);
+        }
+        this.attachments.clear();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

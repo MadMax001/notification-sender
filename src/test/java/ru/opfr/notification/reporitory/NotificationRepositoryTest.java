@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 import ru.opfr.notification.model.Notification;
+import ru.opfr.notification.model.NotificationAttachment;
 import ru.opfr.notification.model.NotificationStage;
 import ru.opfr.notification.model.Person;
 
@@ -23,6 +24,8 @@ class NotificationRepositoryTest {
     private final NotificationRepository notificationRepository;
 
     private final NotificationStageRepository notificationStageRepository;
+
+    private final NotificationAttachmentRepository notificationAttachmentRepository;
     private final TestEntityManager entityManager;
 
     @Test
@@ -232,5 +235,173 @@ class NotificationRepositoryTest {
         assertNull(dbNotification);
         assertNull(dbStage1);
         assertNull(dbStage2);
+    }
+
+    @Test
+    void persistNotificationWithTwoAttachedFiles_ThenLoadNotification_AndCheckFilesContent() {
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        attachment1.setName("file1");
+        attachment1.setContent("Content number 1".getBytes());
+
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        attachment2.setName("file2");
+        attachment2.setContent("Content number 2".getBytes());
+
+        Person modelPerson1 = new Person();
+        modelPerson1.setUser("073User");
+        modelPerson1.setIp("10.73.12.13");
+        modelPerson1.setEmail("user@server.ru");
+
+        Notification notification1 = new Notification();
+        notification1.setType(EMAIL);
+        notification1.setPerson(modelPerson1);
+        notification1.setRemoteId("test-remote-id");
+        notification1.setContent("text");
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(RECEIVED);
+        notification1.addStage(stage1);
+
+        notification1.addAttachment(attachment1);
+        notification1.addAttachment(attachment2);
+
+        notificationRepository.save(notification1);
+        entityManager.flush();
+        Long notificationId = notification1.getId();
+        assertNotNull(attachment1.getId());
+        assertNotNull(attachment2.getId());
+
+        Notification dbNotification = notificationRepository.findById(notificationId).orElse(null);
+        assertNotNull(dbNotification);
+        assertEquals(2, dbNotification.getAttachments().size());
+        NotificationAttachment dbAttachment1 = dbNotification.getAttachments().get(0);
+        NotificationAttachment dbAttachment2 = dbNotification.getAttachments().get(1);
+
+        assertNotNull(dbAttachment1);
+        assertArrayEquals("Content number 1".getBytes(), dbAttachment1.getContent());
+        assertEquals(dbNotification, dbAttachment1.getNotification());
+        assertEquals("file1", dbAttachment1.getName());
+
+        assertNotNull(dbAttachment2);
+        assertArrayEquals("Content number 2".getBytes(), dbAttachment2.getContent());
+        assertEquals(dbNotification, dbAttachment2.getNotification());
+        assertEquals("file2", dbAttachment2.getName());
+
+    }
+
+    @Test
+    void persistNotificationWithTwoAttachedFiles_ThenLoadOnlyFiles_AndCheckFilesContent() {
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        attachment1.setName("file1");
+        attachment1.setContent("Content number 1".getBytes());
+
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        attachment2.setName("file2");
+        attachment2.setContent("Content number 2".getBytes());
+
+        Person modelPerson1 = new Person();
+        modelPerson1.setUser("073User");
+        modelPerson1.setIp("10.73.12.13");
+        modelPerson1.setEmail("user@server.ru");
+
+        Notification notification1 = new Notification();
+        notification1.setType(EMAIL);
+        notification1.setPerson(modelPerson1);
+        notification1.setRemoteId("test-remote-id");
+        notification1.setContent("text");
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(RECEIVED);
+        notification1.addStage(stage1);
+
+        notification1.addAttachment(attachment1);
+        notification1.addAttachment(attachment2);
+
+        notificationRepository.save(notification1);
+        entityManager.flush();
+
+        NotificationAttachment dbAttachment1 = notificationAttachmentRepository.findById(attachment1.getId()).orElse(null);
+        NotificationAttachment dbAttachment2 = notificationAttachmentRepository.findById(attachment2.getId()).orElse(null);
+
+        assertNotNull(dbAttachment1);
+        assertArrayEquals("Content number 1".getBytes(), dbAttachment1.getContent());
+        assertEquals("file1", dbAttachment1.getName());
+
+        assertNotNull(dbAttachment2);
+        assertArrayEquals("Content number 2".getBytes(), dbAttachment2.getContent());
+        assertEquals("file2", dbAttachment2.getName());
+    }
+
+    @Test
+    void persistNotificationWithTwoAttachedFiles_ThenClearAttachments_AndCheckThatNoFileExists() {
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        attachment1.setName("file1");
+        attachment1.setContent("Content number 1".getBytes());
+
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        attachment2.setName("file2");
+        attachment2.setContent("Content number 2".getBytes());
+
+        Person modelPerson1 = new Person();
+        modelPerson1.setUser("073User");
+        modelPerson1.setIp("10.73.12.13");
+        modelPerson1.setEmail("user@server.ru");
+
+        Notification notification1 = new Notification();
+        notification1.setType(EMAIL);
+        notification1.setPerson(modelPerson1);
+        notification1.setRemoteId("test-remote-id");
+        notification1.setContent("text");
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(RECEIVED);
+        notification1.addStage(stage1);
+
+        notification1.addAttachment(attachment1);
+        notification1.addAttachment(attachment2);
+
+        notificationRepository.save(notification1);
+        entityManager.flush();
+        Long attachment1Id = attachment1.getId();
+        Long attachment2Id = attachment2.getId();
+        notification1.clearAttachments();
+        notificationRepository.save(notification1);
+        entityManager.flush();
+
+        Notification dbNotification = notificationRepository.findById(notification1.getId()).orElse(null);
+        assertNotNull(dbNotification);
+        assertEquals(0, dbNotification.getAttachments().size());
+
+        NotificationAttachment dbAttachment1 = notificationAttachmentRepository.findById(attachment1Id).orElse(null);
+        NotificationAttachment dbAttachment2 = notificationAttachmentRepository.findById(attachment2Id).orElse(null);
+
+        assertNull(dbAttachment1);
+        assertNull(dbAttachment2);
+    }
+
+    @Test
+    void persistNotificationWithoutAttachedFiles_ThenClearAttachments_AndCheckThatNoFileExists() {
+
+        Person modelPerson1 = new Person();
+        modelPerson1.setUser("073User");
+        modelPerson1.setIp("10.73.12.13");
+        modelPerson1.setEmail("user@server.ru");
+
+        Notification notification1 = new Notification();
+        notification1.setType(EMAIL);
+        notification1.setPerson(modelPerson1);
+        notification1.setRemoteId("test-remote-id");
+        notification1.setContent("text");
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(RECEIVED);
+        notification1.addStage(stage1);
+
+        notificationRepository.save(notification1);
+        entityManager.flush();
+
+        notification1.clearAttachments();
+        notificationRepository.save(notification1);
+        entityManager.flush();
+
+        Notification dbNotification = notificationRepository.findById(notification1.getId()).orElse(null);
+        assertNotNull(dbNotification);
+        assertEquals(0, dbNotification.getAttachments().size());
     }
 }

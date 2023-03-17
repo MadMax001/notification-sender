@@ -7,6 +7,7 @@ import ru.opfr.notification.model.NotificationTypeDictionary;
 public interface SenderService {
     NotificationTypeDictionary getType();
     boolean send(Notification notification) throws SendNotificationException;
+    void afterSending(Notification notification, boolean result) throws SendNotificationException;
 
     String getSendingResultMessage();
 }

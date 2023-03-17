@@ -8,6 +8,9 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 import static javax.persistence.FetchType.LAZY;
 import static ru.opfr.notification.ApplicationConstants.*;
 
@@ -32,5 +35,18 @@ public class NotificationAttachment {
 
     private byte[] content;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NotificationAttachment)) return false;
+        NotificationAttachment that = (NotificationAttachment) o;
+        return Objects.equals(name, that.name) && Arrays.equals(content, that.content);
+    }
 
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(name);
+        result = 31 * result + Arrays.hashCode(content);
+        return result;
+    }
 }

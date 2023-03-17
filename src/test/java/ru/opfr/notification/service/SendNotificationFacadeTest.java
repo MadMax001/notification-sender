@@ -244,6 +244,42 @@ class SendNotificationFacadeTest {
         verify(notificationStageService).createdStageByDictionary(any(NotificationProcessStageDictionary.class));
         verify(notificationService).save(any(Notification.class));
 
+        verifyForInvokingOnlyOneSenderServiceOnlyOneSendMethodInServiceMapByType(spiedSendersMap, EMAIL);
+
+        assertNotNull(response);
+        assertFalse(response.success);
+        assertEquals(request.id, response.remoteId);
+        assertNull(response.operationId);
+        assertTrue(response.message.contains(messageException));
+        assertTrue(response.message.contains("SendNotificationException"));
+    }
+
+    @Test
+    void sendRequest_AndThrowExceptionInAfterSendingProcess_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException, IOException {
+        Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
+
+        String messageException = "message!!!";
+        Throwable sendException = new SendNotificationException(messageException);
+
+        for (SenderService service : senderServiceMap.values()) {
+            SenderService mockSenderService = Mockito.spy(service);
+            doReturn(true).when(mockSenderService).send(any(Notification.class));
+            doThrow(sendException).when(mockSenderService).afterSending(any(Notification.class), any(Boolean.class));
+            doReturn(null).when(mockSenderService).getSendingResultMessage();
+            spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
+        }
+
+        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
+        mockRegisterNewRequestMethodInNotificationService();
+
+        Request request = getRequestByType(EMAIL);
+        Response response = facade.sendNotificationByRequest(request);
+
+        verify(requestNotificationTransformer).transform(request);
+        verify(notificationStageService).createdStageByDictionary(RECEIVED);
+        verify(notificationStageService).createdStageByDictionary(PROCESSED);
+        verify(notificationService, times(2)).save(any(Notification.class));
+
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, EMAIL);
 
         assertNotNull(response);
@@ -258,9 +294,23 @@ class SendNotificationFacadeTest {
         for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
             if (serviceEntry.getKey() == type) {
                 verify(spiedSendersMap.get(serviceEntry.getKey())).send(any(Notification.class));
+                verify(spiedSendersMap.get(serviceEntry.getKey())).afterSending(any(Notification.class), any(Boolean.class));
+            } else {
+                verify(spiedSendersMap.get(serviceEntry.getKey()), never()).send(any(Notification.class));
+                verify(spiedSendersMap.get(serviceEntry.getKey()), never()).afterSending(any(Notification.class), any(Boolean.class));
+            }
+        }
+    }
+
+
+    private void verifyForInvokingOnlyOneSenderServiceOnlyOneSendMethodInServiceMapByType(Map<NotificationTypeDictionary, SenderService> spiedSendersMap, NotificationTypeDictionary type) throws SendNotificationException {
+        for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
+            if (serviceEntry.getKey() == type) {
+                verify(spiedSendersMap.get(serviceEntry.getKey())).send(any(Notification.class));
             } else {
                 verify(spiedSendersMap.get(serviceEntry.getKey()), never()).send(any(Notification.class));
             }
+            verify(spiedSendersMap.get(serviceEntry.getKey()), never()).afterSending(any(Notification.class), any(Boolean.class));
         }
     }
     private Request getRequestByType(NotificationTypeDictionary type) {

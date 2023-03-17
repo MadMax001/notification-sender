@@ -40,6 +40,7 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
         SenderService service = sendersMap.get(notification.getType());
         boolean success = service.send(notification);
         saveNotificationWithNewStageAdding(notification, success ? PROCESSED: FAILED);
+        service.afterSending(notification, success);
 
         return Response.builder()
                 .remoteId(request.id)

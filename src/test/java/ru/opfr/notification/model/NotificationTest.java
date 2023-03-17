@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.opfr.notification.model.NotificationProcessStageDictionary.RECEIVED;
 import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
 class NotificationTest {
@@ -100,5 +101,39 @@ class NotificationTest {
         assertIterableEquals(Collections.emptyList(), notification.getAttachments());
         assertNull(attachment1.getNotification());
         assertNull(attachment2.getNotification());
+    }
+
+    @Test
+    void calculateHashCode() {
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        attachment1.setName("file1");
+        attachment1.setContent("Content number 1".getBytes());
+        attachment1.setId(1L);
+
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        attachment2.setName("file2");
+        attachment2.setContent("Content number 2".getBytes());
+        attachment1.setId(2L);
+
+        Person modelPerson1 = new Person();
+        modelPerson1.setUser("073User");
+        modelPerson1.setIp("10.73.12.13");
+        modelPerson1.setEmail("user@server.ru");
+
+        Notification notification1 = new Notification();
+        notification1.setId(3L);
+        notification1.setType(EMAIL);
+        notification1.setPerson(modelPerson1);
+        notification1.setRemoteId("test-remote-id");
+        notification1.setContent("text");
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(RECEIVED);
+        stage1.setId(4L);
+        notification1.addStage(stage1);
+
+        notification1.addAttachment(attachment1);
+        notification1.addAttachment(attachment2);
+
+        assertNotEquals(0, notification1.hashCode() );
     }
 }

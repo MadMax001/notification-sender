@@ -53,6 +53,6 @@ public class NotificationStage {
 
     @Override
     public int hashCode() {
-        return Objects.hash(notification, stage, message, created);
+        return Objects.hash(stage, message, created);
     }
 }

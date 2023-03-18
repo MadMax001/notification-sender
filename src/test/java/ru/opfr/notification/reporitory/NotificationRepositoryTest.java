@@ -361,6 +361,7 @@ class NotificationRepositoryTest {
         entityManager.flush();
         Long attachment1Id = attachment1.getId();
         Long attachment2Id = attachment2.getId();
+
         notification1.clearAttachments();
         notificationRepository.save(notification1);
         entityManager.flush();

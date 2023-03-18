@@ -6,4 +6,6 @@ import ru.opfr.notification.model.Notification;
 
 public interface NotificationService {
     Notification save(Notification notification) throws CreationNotificationException;
+
+    void deleteAllAttachments(Notification notification);
 }

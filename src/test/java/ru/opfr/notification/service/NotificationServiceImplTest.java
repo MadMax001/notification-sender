@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
+import ru.opfr.notification.model.NotificationAttachment;
 import ru.opfr.notification.model.NotificationStage;
 import ru.opfr.notification.model.Person;
 import ru.opfr.notification.reporitory.NotificationRepository;
@@ -124,5 +125,34 @@ class NotificationServiceImplTest {
         assertEquals(stageId, newNotification.getStages().get(0).getId());
     }
 
+    @Test
+    void deleteAllAttachmentsByNotification() {
+        when(notificationRepository.save(any(Notification.class)))
+                .then(invocation ->  invocation.getArgument(0));
 
+        Notification notification = new Notification();
+        notification.setId(10L);
+        notification.setType(EMAIL);
+
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        attachment1.setName("file1");
+        attachment1.setContent("Content number 1".getBytes());
+        attachment1.setId(20L);
+
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        attachment2.setName("file2");
+        attachment2.setContent("Content number 2".getBytes());
+        attachment2.setId(21L);
+
+        notification.addAttachment(attachment1);
+        notification.addAttachment(attachment2);
+
+        notificationService.deleteAllAttachments(notification);
+
+        assertEquals(0, notification.getAttachments().size());
+        assertNull(attachment1.getNotification());
+        assertNull(attachment2.getNotification());
+
+
+    }
 }

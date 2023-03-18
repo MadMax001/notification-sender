@@ -4,4 +4,8 @@ public class SendNotificationException extends Exception {
     public SendNotificationException(String message) {
         super(message);
     }
+
+    public SendNotificationException(Throwable e) {
+        super(e);
+    }
 }

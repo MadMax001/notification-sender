@@ -1,8 +1,13 @@
 package ru.opfr.notification.transformers;
 
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
@@ -15,13 +20,14 @@ import java.util.Collections;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SpringExtension.class)
+@ContextHierarchy({
+        @ContextConfiguration(classes = RequestFileTransformerImpl.class),
+        @ContextConfiguration(classes = RequestNotificationTransformerImpl.class)
+})
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class RequestNotificationTransformerImplTest {
-    private RequestNotificationTransformerImpl transformer;
-
-    @BeforeEach
-    void setUp() {
-        transformer = new RequestNotificationTransformerImpl(new RequestFileTransformerImpl());
-    }
+    private final RequestNotificationTransformerImpl transformer;
 
     @Test
     void createEntityFromDTO_WithAllNonNullFields() throws CreationNotificationException, IOException {
@@ -93,11 +99,10 @@ class RequestNotificationTransformerImplTest {
         dto.email = "user@server.ru";
         dto.content = "Content";
         dto.theme = "theme";
-        MultipartFile[] files = {
+        dto.files = new MultipartFile[]{
                 new MockMultipartFile("file1", "file1", null, "Content number 1".getBytes()),
                 new MockMultipartFile("file2", "file2", null, "Content number 2".getBytes()),
         };
-        dto.files = files;
         Notification notificationWithFiles = transformer.transform(dto);
 
         assertNotNull(notificationWithFiles);

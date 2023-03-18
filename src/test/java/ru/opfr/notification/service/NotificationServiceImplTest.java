@@ -1,10 +1,12 @@
 package ru.opfr.notification.service;
 
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationAttachment;
@@ -20,18 +22,14 @@ import static org.mockito.Mockito.*;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.RECEIVED;
 import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = NotificationServiceImpl.class)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class NotificationServiceImplTest {
-    @Mock
-    private NotificationRepository notificationRepository;
+    @MockBean
+    private final NotificationRepository notificationRepository;
 
-    private NotificationService notificationService;
-
-
-    @BeforeEach
-    void setUp() {
-        notificationService = new NotificationServiceImpl(notificationRepository);
-    }
+    private final NotificationService notificationService;
 
     @Test
     void registerNewRequest_AndCheckResultInInitialObject() throws CreationNotificationException {

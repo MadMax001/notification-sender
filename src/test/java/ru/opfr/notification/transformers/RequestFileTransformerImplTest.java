@@ -1,8 +1,12 @@
 package ru.opfr.notification.transformers;
 
-import org.junit.jupiter.api.BeforeEach;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
 import ru.opfr.notification.model.NotificationAttachment;
 
@@ -13,13 +17,12 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(SpringExtension.class)
+@ContextConfiguration(classes = RequestFileTransformerImpl.class)
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 class RequestFileTransformerImplTest {
-    private RequestFileTransformer transformer;
+    private final RequestFileTransformer transformer;
 
-    @BeforeEach
-    void setUp() {
-        transformer = new RequestFileTransformerImpl();
-    }
 
     @Test
     void transformThreeFilesFromRequest() throws IOException {

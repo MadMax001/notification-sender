@@ -89,6 +89,48 @@ class ValidatorForNotificationRepositoryTest {
             assertThrows(ConstraintViolationException.class, entityManager::flush);
         }
 
+        @Test
+        void tryToPersistNotificationWithMoreThan5Attachments_AndThrowException() {
+            Person modelPerson1 = getPersonWithAllFields();
+            Notification notification1 = new Notification();
+            notification1.setType(EMAIL);
+            notification1.setPerson(modelPerson1);
+            notification1.setContent("Test content \nthe second line");
+            notification1.setRemoteId("test-remote-id");
+
+            NotificationStage stage = new NotificationStage();
+            stage.setStage(RECEIVED);
+            notification1.addStage(stage);
+
+            for (int i = 0; i <= 6; i++) {
+                NotificationAttachment attachment = new NotificationAttachment();
+                attachment.setName("file" + i);
+                attachment.setContent(("Content number " + i).getBytes());
+                notification1.addAttachment(attachment);
+            }
+
+            notificationRepository.save(notification1);
+            assertThrows(ConstraintViolationException.class, entityManager::flush);
+        }
+
+        @Test
+        void tryToPersistNotificationWithNullFieldAttachments_AndThrowException() {
+            Person modelPerson1 = getPersonWithAllFields();
+            Notification notification1 = new Notification();
+            notification1.setType(EMAIL);
+            notification1.setPerson(modelPerson1);
+            notification1.setContent("Test content \nthe second line");
+            notification1.setRemoteId("test-remote-id");
+
+            NotificationStage stage = new NotificationStage();
+            stage.setStage(RECEIVED);
+            notification1.addStage(stage);
+
+            notification1.setAttachments(null);
+
+            notificationRepository.save(notification1);
+            assertThrows(ConstraintViolationException.class, entityManager::flush);
+        }
     }
 
 

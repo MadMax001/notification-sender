@@ -17,6 +17,8 @@ public class ApplicationConstants {
     public static final String MAX_LENGTH_STAGE_MESSAGE = "Message in stage has more than 255 characters";
     public static final String MAX_LENGTH_ATTACHMENT_NAME = "Filename has more than 255 characters";
     public static final String NULL_ATTACHMENT_NAME = "Null-filename";
+    public static final String MAX_COUNT_ATTACHMENTS = "Attachments files more than 5";
+    public static final String NULL_ATTACHMENTS = "Null-attachments";
 
 
     private ApplicationConstants() {

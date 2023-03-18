@@ -64,6 +64,8 @@ public class Notification {
     private String theme;
 
     @OneToMany(fetch = LAZY, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Size(max=5, message = MAX_COUNT_ATTACHMENTS)
+    @NotNull(message = NULL_ATTACHMENTS)
     private List<NotificationAttachment> attachments = new ArrayList<>();
 
     @PrePersist

@@ -6,6 +6,10 @@ spring:
       hibernate:
         format_sql: true
 
+  servlet:
+    multipart:
+      max-file-size: 50B
+      max-request-size: 1MB
 logging:
   level:
     org:

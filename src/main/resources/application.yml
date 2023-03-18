@@ -17,3 +17,7 @@ spring:
 #                format_sql: true
     liquibase:
         change-log: classpath:db/changelog/changelog.sql
+    servlet:
+        multipart:
+            max-file-size: 10MB
+            max-request-size: 51MB

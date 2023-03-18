@@ -405,4 +405,56 @@ class NotificationRepositoryTest {
         assertNotNull(dbNotification);
         assertEquals(0, dbNotification.getAttachments().size());
     }
+
+    @Test
+    void persistNotificationWithTwoAttachedFiles_ThenDeleteNotification_AndTryToFindNotificationAttachmentsByIds() {
+        NotificationAttachment attachment1 = new NotificationAttachment();
+        attachment1.setName("file1");
+        attachment1.setContent("Content number 1".getBytes());
+
+        NotificationAttachment attachment2 = new NotificationAttachment();
+        attachment2.setName("file2");
+        attachment2.setContent("Content number 2".getBytes());
+
+        Person modelPerson1 = new Person();
+        modelPerson1.setUser("073User");
+        modelPerson1.setIp("10.73.12.13");
+        modelPerson1.setEmail("user@server.ru");
+
+        Notification notification1 = new Notification();
+        notification1.setType(EMAIL);
+        notification1.setPerson(modelPerson1);
+        notification1.setRemoteId("test-remote-id");
+        notification1.setContent("text");
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(RECEIVED);
+        notification1.addStage(stage1);
+
+        notification1.addAttachment(attachment1);
+        notification1.addAttachment(attachment2);
+
+        notificationRepository.save(notification1);
+        entityManager.flush();
+
+        Long notificationId = notification1.getId();
+        Long attachment1Id = attachment1.getId();
+        Long attachment2Id = attachment1.getId();
+
+        assertNotNull(attachment1Id);
+        assertNotNull(attachment2Id);
+
+        NotificationAttachment dbAttachment1 = notificationAttachmentRepository.findById(attachment1Id).orElse(null);
+        assertNotNull(dbAttachment1);
+        NotificationAttachment dbAttachment2 = notificationAttachmentRepository.findById(attachment2Id).orElse(null);
+        assertNotNull(dbAttachment2);
+
+        notificationRepository.deleteById(notificationId);
+        entityManager.flush();
+
+        NotificationAttachment dbAttachment1AfterDelete = notificationAttachmentRepository.findById(attachment1Id).orElse(null);
+        assertNull(dbAttachment1AfterDelete);
+        NotificationAttachment dbAttachment2AfterDelete = notificationAttachmentRepository.findById(attachment2Id).orElse(null);
+        assertNull(dbAttachment2AfterDelete);
+
+    }
 }

@@ -8,10 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.opfr.notification.exception.CreationNotificationException;
-import ru.opfr.notification.model.Notification;
-import ru.opfr.notification.model.NotificationAttachment;
-import ru.opfr.notification.model.NotificationStage;
-import ru.opfr.notification.model.Person;
+import ru.opfr.notification.model.*;
 import ru.opfr.notification.reporitory.NotificationRepository;
 
 import java.time.LocalDateTime;
@@ -24,10 +21,13 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = NotificationServiceImpl.class)
+
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class NotificationServiceImplTest {
     @MockBean
     private final NotificationRepository notificationRepository;
+    @MockBean
+    private final NotificationStageService notificationStageService;
 
     private final NotificationService notificationService;
 
@@ -152,5 +152,54 @@ class NotificationServiceImplTest {
         assertNull(attachment2.getNotification());
 
 
+    }
+
+    @Test
+    void addNewStageAndSave() throws CreationNotificationException {
+        final Long notificationId = 100L;
+        final Long stageId = 101L;
+
+        when(notificationRepository.save(any(Notification.class)))
+                .then(invocation -> {
+                    Notification notification = invocation.getArgument(0);
+                    notification.setId(notificationId);
+                    notification.setCreated(LocalDateTime.now());
+
+                    notification.getStages().get(0).setId(stageId);
+                    notification.getStages().get(0).setCreated(LocalDateTime.now());
+
+                    return notification;
+                });
+        when(notificationStageService.createdStageByDictionary(any(NotificationProcessStageDictionary.class)))
+                .then(invocatopn -> {
+                    NotificationStage stage = new NotificationStage();
+                    stage.setStage(invocatopn.getArgument(0));
+                    return stage;
+                });
+
+        Notification notification = new Notification();
+        notification.setRemoteId("remote-id");
+        notification.setContent("Content");
+        notification.setType(EMAIL);
+
+        Person person = new Person();
+        person.setUser("073User");
+        person.setIp("10.73.13.14");
+        person.setEmail("user@server.ru");
+        notification.setPerson(person);
+
+        notificationService.addStageAndSave(RECEIVED, notification);
+
+        verify(notificationRepository).save(any(Notification.class));
+        verify(notificationStageService).createdStageByDictionary(any(NotificationProcessStageDictionary.class));
+
+        assertNotNull(notification);
+        assertEquals(notificationId, notification.getId());
+        assertNotNull(notification.getCreated());
+
+        assertEquals(1, notification.getStages().size());
+        assertEquals(notification, notification.getStages().get(0).getNotification());
+        assertNotNull(notification.getStages().get(0).getCreated());
+        assertEquals(stageId, notification.getStages().get(0).getId());
     }
 }

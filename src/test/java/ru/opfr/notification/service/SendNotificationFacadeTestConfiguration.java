@@ -47,13 +47,8 @@ public class SendNotificationFacadeTestConfiguration {
     }
 
     @Bean
-    public NotificationStageService notificationStageService() {
-        return new NotificationStageServiceImpl();
-    }
-
-    @Bean
     public NotificationService notificationService() {
-        return new NotificationServiceImpl(null);
+        return new NotificationServiceImpl(null, null);
     }
 
 }

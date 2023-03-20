@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.Notification;
-import ru.opfr.notification.model.NotificationProcessStageDictionary;
 import ru.opfr.notification.model.NotificationTypeDictionary;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
@@ -19,9 +18,7 @@ import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 @Service
 @RequiredArgsConstructor
 public class SendNotificationFacadeImpl implements SendNotificationFacade {
-
     private final NotificationService notificationService;
-    private final NotificationStageService notificationStageService;
     private final Map<NotificationTypeDictionary, SenderService> sendersMap;
     private final RequestNotificationTransformerImpl requestNotificationTransformer;
 
@@ -38,7 +35,7 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
         Notification notification = saveNotificationByRequest(request);
         SenderService service = sendersMap.get(notification.getType());
         boolean success = service.send(notification);
-        saveNotificationWithNewStageAdding(notification, success ? PROCESSED: FAILED);
+        notificationService.addStageAndSave(success ? PROCESSED: FAILED, notification);
         service.afterSending(notification, success);
 
         return Response.builder()
@@ -51,14 +48,7 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
 
     private Notification saveNotificationByRequest(Request request) throws CreationNotificationException {
         Notification notification = requestNotificationTransformer.transform(request);
-        saveNotificationWithNewStageAdding(notification, RECEIVED);
-        return notification;
-    }
-
-    private void saveNotificationWithNewStageAdding(Notification notification, NotificationProcessStageDictionary stage) throws CreationNotificationException {
-        notification.addStage(notificationStageService.createdStageByDictionary(stage));
-        notificationService.save(notification);
-
+        return notificationService.addStageAndSave(RECEIVED, notification);
     }
 
     private Response failResponseByThrowable(Exception e, Request request) {

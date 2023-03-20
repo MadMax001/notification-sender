@@ -29,6 +29,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.*;
 
@@ -40,8 +41,6 @@ class SendNotificationFacadeTest {
 
     @MockBean
     private final NotificationService notificationService;
-    @SpyBean
-    private final NotificationStageService notificationStageService;
     @SpyBean
     private final RequestNotificationTransformerImpl requestNotificationTransformer;
     private final Map<NotificationTypeDictionary, SenderService> senderServiceMap;
@@ -73,20 +72,20 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
 
 
         NotificationTypeDictionary type = MESSAGE;
 
         Request request = getRequestByType(type);
 
-        mockRegisterNewRequestMethodInNotificationService();
+        mockAddStageAndSaveMethodInNotificationService();
         Response response = facade.sendNotificationByRequest(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationService, times(2)).save(any(Notification.class));
-        verify(notificationStageService).createdStageByDictionary(RECEIVED);
-        verify(notificationStageService).createdStageByDictionary(PROCESSED);
+        verify(notificationService, never()).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(PROCESSED), any(Notification.class));
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, type);
 
         assertNotNull(response);
@@ -119,20 +118,21 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
 
 
         NotificationTypeDictionary type = MESSAGE;
 
         Request request = getRequestByType(type);
 
-        mockRegisterNewRequestMethodInNotificationService();
+        mockAddStageAndSaveMethodInNotificationService();
         Response response = facade.sendNotificationByRequest(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationService, times(2)).save(any(Notification.class));
-        verify(notificationStageService).createdStageByDictionary(RECEIVED);
-        verify(notificationStageService).createdStageByDictionary(FAILED);
+
+        verify(notificationService, never()).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(FAILED), any(Notification.class));
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, type);
 
         assertNotNull(response);
@@ -165,14 +165,14 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         when(notificationService.save(any(Notification.class))).thenReturn(null);
 
         Response response = facade.sendNotificationByRequest(null);
 
         verify(requestNotificationTransformer).transform(null);
         verify(notificationService, never()).save(any(Notification.class));
-        verify(notificationStageService, never()).createdStageByDictionary(any(NotificationProcessStageDictionary.class));
+        verify(notificationService, never()).addStageAndSave(any(NotificationProcessStageDictionary.class), any(Notification.class));
         for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
             verify(spiedSendersMap.get(serviceEntry.getKey()), never()).send(any(Notification.class));
         }
@@ -195,17 +195,17 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         String messageException = "message!!!";
         Throwable persistException = new CreationNotificationException(messageException);
-        when(notificationService.save(any(Notification.class))).thenThrow(persistException);
+        when(notificationService.addStageAndSave(eq(RECEIVED), any(Notification.class))).thenThrow(persistException);
 
         Request request = getRequestByType(FILE);
         Response response = facade.sendNotificationByRequest(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationStageService).createdStageByDictionary(any(NotificationProcessStageDictionary.class));
-        verify(notificationService).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, never()).save(any(Notification.class));
 
         for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
             verify(spiedSendersMap.get(serviceEntry.getKey()), never()).send(any(Notification.class));
@@ -233,15 +233,15 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
-        mockRegisterNewRequestMethodInNotificationService();
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        mockAddStageAndSaveMethodInNotificationService();
 
         Request request = getRequestByType(EMAIL);
         Response response = facade.sendNotificationByRequest(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationStageService).createdStageByDictionary(any(NotificationProcessStageDictionary.class));
-        verify(notificationService).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, never()).save(any(Notification.class));
 
         verifyForInvokingOnlyOneSenderServiceOnlyOneSendMethodInServiceMapByType(spiedSendersMap, EMAIL);
 
@@ -268,16 +268,16 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, notificationStageService, spiedSendersMap, requestNotificationTransformer);
-        mockRegisterNewRequestMethodInNotificationService();
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        mockAddStageAndSaveMethodInNotificationService();
 
         Request request = getRequestByType(EMAIL);
         Response response = facade.sendNotificationByRequest(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationStageService).createdStageByDictionary(RECEIVED);
-        verify(notificationStageService).createdStageByDictionary(PROCESSED);
-        verify(notificationService, times(2)).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, times(1)).addStageAndSave(eq(PROCESSED), any(Notification.class));
+        verify(notificationService, never()).save(any(Notification.class));
 
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, EMAIL);
 
@@ -325,15 +325,21 @@ class SendNotificationFacadeTest {
 
     }
 
-    private void mockRegisterNewRequestMethodInNotificationService() throws CreationNotificationException {
-        when(notificationService.save(any(Notification.class))).then((invocation) -> {
-            Notification notification = invocation.getArgument(0);
+    private void mockAddStageAndSaveMethodInNotificationService() throws CreationNotificationException {
+        when(notificationService.addStageAndSave(any(NotificationProcessStageDictionary.class), any(Notification.class))).then((invocation) -> {
+
+            Notification notification = invocation.getArgument(1);
             notification.setId(modelNotificationId);
             if (Objects.isNull(notification.getCreated())) {
                 notification.setCreated(LocalDateTime.now());
             } else {
                 notification.setUpdated(LocalDateTime.now());
             }
+
+            NotificationStage stage = new NotificationStage();
+            stage.setStage(invocation.getArgument(0));
+            notification.addStage(stage);
+
             if (notification.getStages().size() == 1) {
                 notification.getStages().get(0).setCreated(LocalDateTime.now());
                 notification.getStages().get(0).setId(receivedStageId);

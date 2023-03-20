@@ -8,14 +8,15 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
+import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.NotificationAttachment;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = RequestFileTransformerImpl.class)
@@ -25,7 +26,7 @@ class RequestFileTransformerImplTest {
 
 
     @Test
-    void transformThreeFilesFromRequest() throws IOException {
+    void transformTwoFilesFromRequest() throws CreationNotificationException {
         MultipartFile[] files = {
             new MockMultipartFile("file1", "file1", null, "Content number 1".getBytes()),
             new MockMultipartFile("file2", "file2", null, "Content number 2".getBytes()),
@@ -40,6 +41,16 @@ class RequestFileTransformerImplTest {
 
         assertEquals("file2", filesList.get(1).getName());
         assertArrayEquals("Content number 2".getBytes(), filesList.get(1).getContent());
+
+    }
+
+    @Test
+    void transformFileFromRequest_AndCantGetContent_AndThrowException() throws IOException {
+        MultipartFile file = new MockMultipartFile("file1", "file1", null, "Content number 1".getBytes());
+        MultipartFile mockFile = spy(file);
+        doThrow(IOException.class).when(mockFile).getBytes();
+
+        assertThrows(CreationNotificationException.class, () -> transformer.transform(mockFile));
 
     }
 }

@@ -11,7 +11,6 @@ import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
 import ru.opfr.notification.transformers.RequestNotificationTransformerImpl;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 
@@ -30,12 +29,12 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
     public Response sendNotificationByRequest(Request request) {
         try {
             return sendNotificationWorkflow(request);
-        } catch (SendNotificationException | CreationNotificationException | IOException e) {
+        } catch (SendNotificationException | CreationNotificationException e) {
             return failResponseByThrowable(e, request);
         }
     }
 
-    private Response sendNotificationWorkflow(Request request) throws CreationNotificationException, SendNotificationException, IOException {
+    private Response sendNotificationWorkflow(Request request) throws CreationNotificationException, SendNotificationException {
         Notification notification = saveNotificationByRequest(request);
         SenderService service = sendersMap.get(notification.getType());
         boolean success = service.send(notification);
@@ -50,7 +49,7 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
                 .build();
     }
 
-    private Notification saveNotificationByRequest(Request request) throws CreationNotificationException, IOException {
+    private Notification saveNotificationByRequest(Request request) throws CreationNotificationException {
         Notification notification = requestNotificationTransformer.transform(request);
         saveNotificationWithNewStageAdding(notification, RECEIVED);
         return notification;

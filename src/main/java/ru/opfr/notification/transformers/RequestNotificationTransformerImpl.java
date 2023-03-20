@@ -10,7 +10,6 @@ import ru.opfr.notification.model.NotificationTypeDictionary;
 import ru.opfr.notification.model.Person;
 import ru.opfr.notification.model.dto.Request;
 
-import java.io.IOException;
 import java.util.Objects;
 
 @Component
@@ -19,7 +18,7 @@ public class RequestNotificationTransformerImpl implements RequestNotificationTr
 
     private final RequestFileTransformerImpl requestFileTransformer;
 
-    public Notification transform(Request request) throws CreationNotificationException, IOException {
+    public Notification transform(Request request) throws CreationNotificationException {
         checkForNullRequest(request);
 
         Notification notification = new Notification();
@@ -45,7 +44,7 @@ public class RequestNotificationTransformerImpl implements RequestNotificationTr
         return person;
     }
 
-    private void setFilesIntoNotification(MultipartFile[] files, Notification notification) throws IOException {
+    private void setFilesIntoNotification(MultipartFile[] files, Notification notification) throws CreationNotificationException {
         if (Objects.nonNull(files)) {
             for (MultipartFile file : files)
                 notification.addAttachment(requestFileTransformer.transform(file));

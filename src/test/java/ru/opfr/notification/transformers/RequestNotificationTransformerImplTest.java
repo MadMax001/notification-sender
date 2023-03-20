@@ -14,7 +14,6 @@ import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
 import ru.opfr.notification.model.dto.Request;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,7 +29,7 @@ class RequestNotificationTransformerImplTest {
     private final RequestNotificationTransformerImpl transformer;
 
     @Test
-    void createEntityFromDTO_WithAllNonNullFields() throws CreationNotificationException, IOException {
+    void createEntityFromDTO_WithAllNonNullFields() throws CreationNotificationException {
         Request dto = new Request();
         dto.type = NotificationTypeDictionary.EMAIL.toString();
         dto.id = "remote-id";
@@ -62,7 +61,7 @@ class RequestNotificationTransformerImplTest {
     }
 
     @Test
-    void createEntityWithWrongType_andGetNotificationWithNullType() throws CreationNotificationException, IOException {
+    void createEntityWithWrongType_andGetNotificationWithNullType() throws CreationNotificationException {
         Request dto = new Request();
         dto.type = "aaa";
         dto.id = "remote-id";
@@ -77,7 +76,7 @@ class RequestNotificationTransformerImplTest {
     }
 
     @Test
-    void createEntityWithTypeToLowerCase_andGetNotificationWithNullType() throws CreationNotificationException, IOException {
+    void createEntityWithTypeToLowerCase_andGetNotificationWithNullType() throws CreationNotificationException {
         Request dto = new Request();
         dto.type = NotificationTypeDictionary.EMAIL.toString().toLowerCase();
         dto.id = "remote-id";
@@ -92,7 +91,7 @@ class RequestNotificationTransformerImplTest {
     }
 
     @Test
-    void createEntityWithAttachedFiles() throws CreationNotificationException, IOException {
+    void createEntityWithAttachedFiles() throws CreationNotificationException {
         Request dto = new Request();
         dto.type = NotificationTypeDictionary.EMAIL.toString();
         dto.id = "remote-id";

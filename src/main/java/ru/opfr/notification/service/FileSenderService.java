@@ -7,7 +7,7 @@ import ru.opfr.notification.model.NotificationTypeDictionary;
 
 import static ru.opfr.notification.model.NotificationTypeDictionary.FILE;
 @Service
-public class FileSenderService implements SenderService {
+public class FileSenderService extends AbstractSenderService {
     @Override
     public NotificationTypeDictionary getType() {
         return FILE;
@@ -24,8 +24,4 @@ public class FileSenderService implements SenderService {
 
     }
 
-    @Override
-    public String getSendingResultMessage() {
-        return null;
-    }
 }

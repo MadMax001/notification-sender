@@ -7,7 +7,7 @@ import ru.opfr.notification.model.NotificationTypeDictionary;
 
 import static ru.opfr.notification.model.NotificationTypeDictionary.MESSAGE;
 @Service
-public class MessageSenderService implements SenderService {
+public class MessageSenderService extends AbstractSenderService {
     @Override
     public NotificationTypeDictionary getType() {
         return MESSAGE;
@@ -21,10 +21,5 @@ public class MessageSenderService implements SenderService {
     @Override
     public void afterSending(Notification notification, boolean result) throws SendNotificationException {
 
-    }
-
-    @Override
-    public String getSendingResultMessage() {
-        return null;
     }
 }

@@ -11,7 +11,7 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
 @Service
 @RequiredArgsConstructor
-public class EmailSenderService implements SenderService {
+public class EmailSenderService extends AbstractSenderService {
     private final NotificationService notificationService;
     @Override
     public NotificationTypeDictionary getType() {
@@ -31,10 +31,5 @@ public class EmailSenderService implements SenderService {
         }catch (ApplicationRuntimeException e) {
             throw new SendNotificationException(e);
         }
-    }
-
-    @Override
-    public String getSendingResultMessage() {
-        return null;
     }
 }

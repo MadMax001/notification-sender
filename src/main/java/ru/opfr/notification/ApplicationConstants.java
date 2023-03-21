@@ -19,6 +19,7 @@ public class ApplicationConstants {
     public static final String NULL_ATTACHMENT_NAME = "Null-filename";
     public static final String MAX_COUNT_ATTACHMENTS = "Attachments files more than 5";
     public static final String NULL_ATTACHMENTS = "Null-attachments";
+    public static final String NULL_STAGE_TYPE = "Null-stage type";
 
 
     private ApplicationConstants() {

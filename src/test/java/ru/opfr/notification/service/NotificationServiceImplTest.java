@@ -59,8 +59,10 @@ class NotificationServiceImplTest {
         person.setEmail("user@server.ru");
         notification.setPerson(person);
 
+        String message = "Test message";
         NotificationStage stage = new NotificationStage();
         stage.setStage(RECEIVED);
+        stage.setMessage(message);
         notification.addStage(stage);
 
         notificationService.save(notification);
@@ -75,6 +77,7 @@ class NotificationServiceImplTest {
         assertEquals(notification, notification.getStages().get(0).getNotification());
         assertNotNull(notification.getStages().get(0).getCreated());
         assertEquals(stageId, notification.getStages().get(0).getId());
+        assertEquals(message, notification.getStages().get(0).getMessage());
     }
 
     @Test
@@ -105,8 +108,10 @@ class NotificationServiceImplTest {
         person.setEmail("user@server.ru");
         notification.setPerson(person);
 
+        String message = "Test message";
         NotificationStage stage = new NotificationStage();
         stage.setStage(RECEIVED);
+        stage.setMessage(message);
         notification.addStage(stage);
 
         Notification newNotification = notificationService.save(notification);
@@ -121,6 +126,7 @@ class NotificationServiceImplTest {
         assertEquals(newNotification, newNotification.getStages().get(0).getNotification());
         assertNotNull(newNotification.getStages().get(0).getCreated());
         assertEquals(stageId, newNotification.getStages().get(0).getId());
+        assertEquals(message, newNotification.getStages().get(0).getMessage());
     }
 
     @Test
@@ -170,10 +176,11 @@ class NotificationServiceImplTest {
 
                     return notification;
                 });
-        when(notificationStageService.createdStageByDictionary(any(NotificationProcessStageDictionary.class)))
+        when(notificationStageService.createdStageByDictionaryWithMessage(any(NotificationProcessStageDictionary.class), any(String.class)))
                 .then(invocatopn -> {
                     NotificationStage stage = new NotificationStage();
                     stage.setStage(invocatopn.getArgument(0));
+                    stage.setMessage(invocatopn.getArgument(1));
                     return stage;
                 });
 
@@ -188,10 +195,11 @@ class NotificationServiceImplTest {
         person.setEmail("user@server.ru");
         notification.setPerson(person);
 
-        notificationService.addStageAndSave(RECEIVED, notification);
+        final String message = "Test message";
+        notificationService.addStageWithMessageAndSave(RECEIVED, message, notification);
 
         verify(notificationRepository).save(any(Notification.class));
-        verify(notificationStageService).createdStageByDictionary(any(NotificationProcessStageDictionary.class));
+        verify(notificationStageService).createdStageByDictionaryWithMessage(any(NotificationProcessStageDictionary.class), any(String.class));
 
         assertNotNull(notification);
         assertEquals(notificationId, notification.getId());
@@ -201,5 +209,6 @@ class NotificationServiceImplTest {
         assertEquals(notification, notification.getStages().get(0).getNotification());
         assertNotNull(notification.getStages().get(0).getCreated());
         assertEquals(stageId, notification.getStages().get(0).getId());
+        assertEquals(message, notification.getStages().get(0).getMessage());
     }
 }

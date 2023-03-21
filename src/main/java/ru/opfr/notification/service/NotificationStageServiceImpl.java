@@ -7,9 +7,10 @@ import ru.opfr.notification.model.NotificationStage;
 @Service
 public class NotificationStageServiceImpl implements NotificationStageService {
     @Override
-    public NotificationStage createdStageByDictionary(NotificationProcessStageDictionary stageDictionary) {
-        NotificationStage receivedStage = new NotificationStage();
-        receivedStage.setStage(stageDictionary);
-        return receivedStage;
+    public NotificationStage createdStageByDictionaryWithMessage(NotificationProcessStageDictionary stageDictionary, String message) {
+        NotificationStage newStage = new NotificationStage();
+        newStage.setStage(stageDictionary);
+        newStage.setMessage(message);
+        return newStage;
     }
 }

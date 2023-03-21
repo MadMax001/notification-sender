@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static javax.persistence.FetchType.LAZY;
-import static ru.opfr.notification.ApplicationConstants.MAX_LENGTH_STAGE_MESSAGE;
+import static ru.opfr.notification.ApplicationConstants.*;
 
 @Getter
 @Setter
@@ -30,8 +30,8 @@ public class NotificationStage {
     private Notification notification;
 
     @Enumerated(EnumType.STRING)
-    @NotNull(message = "stage can't be null")
-    private NotificationProcessStageDictionary stage;                       //todo to ApplicationConstants
+    @NotNull(message = NULL_STAGE_TYPE)
+    private NotificationProcessStageDictionary stage;
 
     @Size(max=255, message = MAX_LENGTH_STAGE_MESSAGE)
     private String message;

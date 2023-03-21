@@ -22,21 +22,21 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
     private final Map<NotificationTypeDictionary, SenderService> sendersMap;
     private final RequestNotificationTransformerImpl requestNotificationTransformer;
 
-    @Override
-    public Response sendNotificationByRequest(Request request) {
+    public Response sendNotificationWorkflow(Request request) {
         try {
-            return sendNotificationWorkflow(request);
+            return send(request);
         } catch (SendNotificationException | CreationNotificationException e) {
             return failResponseByThrowable(e, request);
         }
     }
 
-    private Response sendNotificationWorkflow(Request request) throws CreationNotificationException, SendNotificationException {
+    @Override
+    public Response send(Request request) throws CreationNotificationException, SendNotificationException {
         Notification notification = saveNotificationByRequest(request);
         SenderService service = sendersMap.get(notification.getType());
-        boolean success = service.send(notification);
-        notificationService.addStageAndSave(success ? PROCESSED: FAILED, notification);
-        service.afterSending(notification, success);
+        boolean success = service.sendNotificationWorkflow(notification);
+        notificationService.addStageWithMessageAndSave(success ? PROCESSED: FAILED, service.getSendingResultMessage(), notification);
+
 
         return Response.builder()
                 .remoteId(request.id)
@@ -44,11 +44,12 @@ public class SendNotificationFacadeImpl implements SendNotificationFacade {
                 .success(success)
                 .message(service.getSendingResultMessage())
                 .build();
+
     }
 
     private Notification saveNotificationByRequest(Request request) throws CreationNotificationException {
         Notification notification = requestNotificationTransformer.transform(request);
-        return notificationService.addStageAndSave(RECEIVED, notification);
+        return notificationService.addStageWithMessageAndSave(RECEIVED, null, notification);
     }
 
     private Response failResponseByThrowable(Exception e, Request request) {

@@ -4,5 +4,5 @@ import ru.opfr.notification.model.NotificationProcessStageDictionary;
 import ru.opfr.notification.model.NotificationStage;
 
 public interface NotificationStageService {
-    NotificationStage createdStageByDictionary(NotificationProcessStageDictionary stageDictionary);
+    NotificationStage createdStageByDictionaryWithMessage(NotificationProcessStageDictionary stageDictionary, String message);
 }

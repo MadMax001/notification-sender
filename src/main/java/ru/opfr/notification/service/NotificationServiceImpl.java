@@ -20,8 +20,8 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
-    public Notification addStageAndSave(NotificationProcessStageDictionary stage, Notification notification) throws CreationNotificationException {
-        notification.addStage(notificationStageService.createdStageByDictionary(stage));
+    public Notification addStageWithMessageAndSave(NotificationProcessStageDictionary stage, String message, Notification notification) throws CreationNotificationException {
+        notification.addStage(notificationStageService.createdStageByDictionaryWithMessage(stage, message));
         return save(notification);
     }
 

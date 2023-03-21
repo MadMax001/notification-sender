@@ -20,12 +20,14 @@ class NotificationStageServiceImplTest {
     private final NotificationStageService notificationStageService;
 
     @Test
-    void checkCreatedReceivedStage() {
+    void checkCreatedReceivedStageWithMessage() {
         NotificationProcessStageDictionary stage = RECEIVED;
-        NotificationStage notificationStage = notificationStageService.createdStageByDictionary(stage);
+        String message = "Test message";
+        NotificationStage notificationStage = notificationStageService.createdStageByDictionaryWithMessage(stage, message);
         assertNotNull(notificationStage);
         assertEquals(stage, notificationStage.getStage());
-        assertNull(notificationStage.getMessage());
+        assertEquals(message, notificationStage.getMessage());
+        assertEquals(message, notificationStage.getMessage());
     }
 
 }

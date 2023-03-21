@@ -60,7 +60,7 @@ class ValidatorForNotificationRepositoryTest {
     }
 
     @Nested
-    class StagesCollectionValidation {
+    class CollectionValidation {
         @Test
         void tryToPersistNotificationWithNullStageCollections_AndThrowException() {
             Person modelPerson1 = getPersonWithAllFields();

@@ -54,21 +54,21 @@ class SendNotificationFacadeTest {
     private final long processedStageId = 1011L;
 
     private ThreadLocal<Notification> innerNotificationInProcess;
-
+    final static String PROCESSED_STAGE_MESSAGE = "processed successfully";
+    final static String FAILED_STAGE_MESSAGE = "processed unsuccessfully";
 
     @BeforeEach
     void setUp() {
-
         innerNotificationInProcess = new ThreadLocal<>();
     }
 
     @Test
-    void sendRequest_WithSuccessfulSendOperation_AndGetSuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+    void sendNotificationWorkflow_WithSuccessfulSendOperation_AndGetSuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
             doReturn(true).when(mockSenderService).send(any(Notification.class));
-            doReturn("OK").when(mockSenderService).getSendingResultMessage();
+            doReturn(PROCESSED_STAGE_MESSAGE).when(mockSenderService).getSendingResultMessage();
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
@@ -80,19 +80,20 @@ class SendNotificationFacadeTest {
         Request request = getRequestByType(type);
 
         mockAddStageAndSaveMethodInNotificationService();
-        Response response = facade.sendNotificationByRequest(request);
+
+        Response response = facade.sendNotificationWorkflow(request);
 
         verify(requestNotificationTransformer).transform(request);
         verify(notificationService, never()).save(any(Notification.class));
-        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
-        verify(notificationService, times(1)).addStageAndSave(eq(PROCESSED), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(PROCESSED), eq(PROCESSED_STAGE_MESSAGE), any(Notification.class));
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, type);
 
         assertNotNull(response);
         assertTrue(response.success);
         assertEquals(modelRequestId, response.remoteId);
         assertNotNull(response.operationId);
-        assertNotNull(response.message);
+        assertEquals(PROCESSED_STAGE_MESSAGE, response.message);
 
         Notification notification2 = innerNotificationInProcess.get();
         assertNotNull(notification2);
@@ -101,20 +102,21 @@ class SendNotificationFacadeTest {
         NotificationStage stage21 = notification2.getStages().get(0);
         assertEquals(RECEIVED, stage21.getStage());
         assertEquals(receivedStageId, stage21.getId());
+        assertNull(stage21.getMessage());
         NotificationStage stage22 = notification2.getStages().get(1);
         assertEquals(PROCESSED, stage22.getStage());
         assertEquals(processedStageId, stage22.getId());
-
+        assertEquals(PROCESSED_STAGE_MESSAGE, stage22.getMessage());
 
     }
 
     @Test
-    void sendRequest_WithUnsuccessfulSendOperation_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+    void sendNotificationWorkflow_WithSuccessfulSendOperationWithNullOperationMessage_AndGetSuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
-            doReturn(false).when(mockSenderService).send(any(Notification.class));
-            doReturn("Sending process error").when(mockSenderService).getSendingResultMessage();
+            doReturn(true).when(mockSenderService).send(any(Notification.class));
+            doReturn(null).when(mockSenderService).getSendingResultMessage();
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
@@ -126,20 +128,20 @@ class SendNotificationFacadeTest {
         Request request = getRequestByType(type);
 
         mockAddStageAndSaveMethodInNotificationService();
-        Response response = facade.sendNotificationByRequest(request);
+
+        Response response = facade.sendNotificationWorkflow(request);
 
         verify(requestNotificationTransformer).transform(request);
-
         verify(notificationService, never()).save(any(Notification.class));
-        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
-        verify(notificationService, times(1)).addStageAndSave(eq(FAILED), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(PROCESSED), isNull(), any(Notification.class));
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, type);
 
         assertNotNull(response);
-        assertFalse(response.success);
-        assertEquals(request.id, response.remoteId);
+        assertTrue(response.success);
+        assertEquals(modelRequestId, response.remoteId);
         assertNotNull(response.operationId);
-        assertNotNull(response.message);
+        assertNull(response.message);
 
         Notification notification2 = innerNotificationInProcess.get();
         assertNotNull(notification2);
@@ -148,15 +150,112 @@ class SendNotificationFacadeTest {
         NotificationStage stage21 = notification2.getStages().get(0);
         assertEquals(RECEIVED, stage21.getStage());
         assertEquals(receivedStageId, stage21.getId());
+        assertNull(stage21.getMessage());
         NotificationStage stage22 = notification2.getStages().get(1);
-        assertEquals(FAILED, stage22.getStage());
+        assertEquals(PROCESSED, stage22.getStage());
         assertEquals(processedStageId, stage22.getId());
-
+        assertNull(stage22.getMessage());
 
     }
 
+
     @Test
-    void sendRequestWithNullRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
+    void sendNotificationWorkflow_WithUnsuccessfulSendOperation_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+        Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
+        for (SenderService service : senderServiceMap.values()) {
+            SenderService mockSenderService = Mockito.spy(service);
+            doReturn(false).when(mockSenderService).send(any(Notification.class));
+            doReturn(FAILED_STAGE_MESSAGE).when(mockSenderService).getSendingResultMessage();
+            spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
+        }
+
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+
+
+        NotificationTypeDictionary type = MESSAGE;
+
+        Request request = getRequestByType(type);
+
+        mockAddStageAndSaveMethodInNotificationService();
+        Response response = facade.sendNotificationWorkflow(request);
+
+        verify(requestNotificationTransformer).transform(request);
+
+        verify(notificationService, never()).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(FAILED), eq(FAILED_STAGE_MESSAGE), any(Notification.class));
+        verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, type);
+
+        assertNotNull(response);
+        assertFalse(response.success);
+        assertEquals(request.id, response.remoteId);
+        assertNotNull(response.operationId);
+        assertEquals(FAILED_STAGE_MESSAGE, response.message);
+
+        Notification notification2 = innerNotificationInProcess.get();
+        assertNotNull(notification2);
+        assertEquals(modelNotificationId, notification2.getId());
+        assertEquals(2, notification2.getStages().size());
+        NotificationStage stage21 = notification2.getStages().get(0);
+        assertEquals(RECEIVED, stage21.getStage());
+        assertEquals(receivedStageId, stage21.getId());
+        assertNull(stage21.getMessage());
+        NotificationStage stage22 = notification2.getStages().get(1);
+        assertEquals(FAILED, stage22.getStage());
+        assertEquals(processedStageId, stage22.getId());
+        assertEquals(FAILED_STAGE_MESSAGE, stage22.getMessage());
+    }
+
+    @Test
+    void sendNotificationWorkflow_WithUnsuccessfulSendOperationWithNullOperationMessage_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+        Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
+        for (SenderService service : senderServiceMap.values()) {
+            SenderService mockSenderService = Mockito.spy(service);
+            doReturn(false).when(mockSenderService).send(any(Notification.class));
+            doReturn(null).when(mockSenderService).getSendingResultMessage();
+            spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
+        }
+
+        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+
+
+        NotificationTypeDictionary type = MESSAGE;
+
+        Request request = getRequestByType(type);
+
+        mockAddStageAndSaveMethodInNotificationService();
+        Response response = facade.sendNotificationWorkflow(request);
+
+        verify(requestNotificationTransformer).transform(request);
+
+        verify(notificationService, never()).save(any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(FAILED), isNull(), any(Notification.class));
+        verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, type);
+
+        assertNotNull(response);
+        assertFalse(response.success);
+        assertEquals(request.id, response.remoteId);
+        assertNotNull(response.operationId);
+        assertNull(response.message);
+
+        Notification notification2 = innerNotificationInProcess.get();
+        assertNotNull(notification2);
+        assertEquals(modelNotificationId, notification2.getId());
+        assertEquals(2, notification2.getStages().size());
+        NotificationStage stage21 = notification2.getStages().get(0);
+        assertEquals(RECEIVED, stage21.getStage());
+        assertEquals(receivedStageId, stage21.getId());
+        assertNull(stage21.getMessage());
+        NotificationStage stage22 = notification2.getStages().get(1);
+        assertEquals(FAILED, stage22.getStage());
+        assertEquals(processedStageId, stage22.getId());
+        assertNull(stage22.getMessage());
+    }
+
+
+    @Test
+    void sendNotificationWorkflow_WithNullRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
@@ -168,11 +267,11 @@ class SendNotificationFacadeTest {
         facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         when(notificationService.save(any(Notification.class))).thenReturn(null);
 
-        Response response = facade.sendNotificationByRequest(null);
+        Response response = facade.sendNotificationWorkflow(null);
 
         verify(requestNotificationTransformer).transform(null);
         verify(notificationService, never()).save(any(Notification.class));
-        verify(notificationService, never()).addStageAndSave(any(NotificationProcessStageDictionary.class), any(Notification.class));
+        verify(notificationService, never()).addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), isNull(), any(Notification.class));
         for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
             verify(spiedSendersMap.get(serviceEntry.getKey()), never()).send(any(Notification.class));
         }
@@ -183,10 +282,11 @@ class SendNotificationFacadeTest {
         assertNull(response.operationId);
         assertTrue(response.message.contains(ApplicationConstants.NULL_REQUEST));
         assertTrue(response.message.contains("CreationNotificationException"));
+        assertNull(innerNotificationInProcess.get());
     }
 
     @Test
-    void sendRequestWithWrongRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
+    void sendNotificationWorkflow_WithWrongRequest_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
@@ -198,13 +298,13 @@ class SendNotificationFacadeTest {
         facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         String messageException = "message!!!";
         Throwable persistException = new CreationNotificationException(messageException);
-        when(notificationService.addStageAndSave(eq(RECEIVED), any(Notification.class))).thenThrow(persistException);
+        when(notificationService.addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class))).thenThrow(persistException);
 
         Request request = getRequestByType(FILE);
-        Response response = facade.sendNotificationByRequest(request);
+        Response response = facade.sendNotificationWorkflow(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
         verify(notificationService, never()).save(any(Notification.class));
 
         for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
@@ -217,10 +317,11 @@ class SendNotificationFacadeTest {
         assertNull(response.operationId);
         assertTrue(response.message.contains(messageException));
         assertTrue(response.message.contains("CreationNotificationException"));
+        assertNull(innerNotificationInProcess.get());
     }
 
     @Test
-    void sendRequest_AndThrowExceptionInSendProcess_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
+    void sendNotificationWorkflow_AndThrowExceptionInSendProcess_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
         Map<NotificationTypeDictionary, SenderService> spiedSendersMap = new HashMap<>();
 
         String messageException = "message!!!";
@@ -229,7 +330,7 @@ class SendNotificationFacadeTest {
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
             doThrow(sendException).when(mockSenderService).send(any(Notification.class));
-            doReturn(null).when(mockSenderService).getSendingResultMessage();
+            doReturn(sendException.getClass().getSimpleName() + ": " + sendException.getMessage()).when(mockSenderService).getSendingResultMessage();
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
@@ -237,10 +338,10 @@ class SendNotificationFacadeTest {
         mockAddStageAndSaveMethodInNotificationService();
 
         Request request = getRequestByType(EMAIL);
-        Response response = facade.sendNotificationByRequest(request);
+        Response response = facade.sendNotificationWorkflow(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
         verify(notificationService, never()).save(any(Notification.class));
 
         verifyForInvokingOnlyOneSenderServiceOnlyOneSendMethodInServiceMapByType(spiedSendersMap, EMAIL);
@@ -248,10 +349,26 @@ class SendNotificationFacadeTest {
         assertNotNull(response);
         assertFalse(response.success);
         assertEquals(request.id, response.remoteId);
-        assertNull(response.operationId);
+        assertEquals(modelNotificationId, response.operationId);
         assertTrue(response.message.contains(messageException));
         assertTrue(response.message.contains("SendNotificationException"));
+
+        Notification notification2 = innerNotificationInProcess.get();
+        assertNotNull(notification2);
+        assertEquals(modelNotificationId, notification2.getId());
+        assertEquals(2, notification2.getStages().size());
+        NotificationStage stage21 = notification2.getStages().get(0);
+        assertEquals(RECEIVED, stage21.getStage());
+        assertEquals(receivedStageId, stage21.getId());
+        assertNull(stage21.getMessage());
+        NotificationStage stage22 = notification2.getStages().get(1);
+        assertEquals(FAILED, stage22.getStage());
+        assertEquals(processedStageId, stage22.getId());
+        assertTrue(stage22.getMessage().contains(messageException));
+        assertTrue(stage22.getMessage().contains(sendException.getClass().getSimpleName()));
+
     }
+
 
     @Test
     void sendRequest_AndThrowExceptionInAfterSendingProcess_AndGetUnsuccessfulResponse() throws SendNotificationException, CreationNotificationException {
@@ -260,11 +377,12 @@ class SendNotificationFacadeTest {
         String messageException = "message!!!";
         Throwable sendException = new SendNotificationException(messageException);
 
+        String errorMessage = "Error";
         for (SenderService service : senderServiceMap.values()) {
             SenderService mockSenderService = Mockito.spy(service);
             doReturn(true).when(mockSenderService).send(any(Notification.class));
             doThrow(sendException).when(mockSenderService).afterSending(any(Notification.class), any(Boolean.class));
-            doReturn(null).when(mockSenderService).getSendingResultMessage();
+            doReturn(errorMessage).when(mockSenderService).getSendingResultMessage();
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
@@ -272,11 +390,11 @@ class SendNotificationFacadeTest {
         mockAddStageAndSaveMethodInNotificationService();
 
         Request request = getRequestByType(EMAIL);
-        Response response = facade.sendNotificationByRequest(request);
+        Response response = facade.sendNotificationWorkflow(request);
 
         verify(requestNotificationTransformer).transform(request);
-        verify(notificationService, times(1)).addStageAndSave(eq(RECEIVED), any(Notification.class));
-        verify(notificationService, times(1)).addStageAndSave(eq(PROCESSED), any(Notification.class));
+        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
+//        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(FAILED), any(String.class), any(Notification.class));
         verify(notificationService, never()).save(any(Notification.class));
 
         verifyForInvokingOnlyOneSenderServiceInServiceMapByType(spiedSendersMap, EMAIL);
@@ -284,9 +402,22 @@ class SendNotificationFacadeTest {
         assertNotNull(response);
         assertFalse(response.success);
         assertEquals(request.id, response.remoteId);
-        assertNull(response.operationId);
-        assertTrue(response.message.contains(messageException));
-        assertTrue(response.message.contains("SendNotificationException"));
+        assertEquals(modelNotificationId, response.operationId);
+        assertEquals(errorMessage, response.message);
+
+        Notification notification2 = innerNotificationInProcess.get();
+        assertNotNull(notification2);
+        assertEquals(modelNotificationId, notification2.getId());
+        assertEquals(2, notification2.getStages().size());
+        NotificationStage stage21 = notification2.getStages().get(0);
+        assertEquals(RECEIVED, stage21.getStage());
+        assertEquals(receivedStageId, stage21.getId());
+        assertNull(stage21.getMessage());
+        NotificationStage stage22 = notification2.getStages().get(1);
+        assertEquals(FAILED, stage22.getStage());
+        assertEquals(processedStageId, stage22.getId());
+        assertEquals(errorMessage, stage22.getMessage());
+
     }
 
     private void verifyForInvokingOnlyOneSenderServiceInServiceMapByType(Map<NotificationTypeDictionary, SenderService> spiedSendersMap, NotificationTypeDictionary type) throws SendNotificationException {
@@ -326,9 +457,9 @@ class SendNotificationFacadeTest {
     }
 
     private void mockAddStageAndSaveMethodInNotificationService() throws CreationNotificationException {
-        when(notificationService.addStageAndSave(any(NotificationProcessStageDictionary.class), any(Notification.class))).then((invocation) -> {
+        when(notificationService.addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), any(), any(Notification.class))).then((invocation) -> {
 
-            Notification notification = invocation.getArgument(1);
+            Notification notification = invocation.getArgument(2);
             notification.setId(modelNotificationId);
             if (Objects.isNull(notification.getCreated())) {
                 notification.setCreated(LocalDateTime.now());
@@ -343,13 +474,14 @@ class SendNotificationFacadeTest {
             if (notification.getStages().size() == 1) {
                 notification.getStages().get(0).setCreated(LocalDateTime.now());
                 notification.getStages().get(0).setId(receivedStageId);
+                notification.getStages().get(0).setMessage(invocation.getArgument(1));
             } else if (notification.getStages().size() == 2) {
                 notification.getStages().get(1).setCreated(LocalDateTime.now());
                 notification.getStages().get(1).setId(processedStageId);
+                notification.getStages().get(1).setMessage(invocation.getArgument(1));
             }
             innerNotificationInProcess.set(notification);
             return notification;
         });
     }
-
 }

@@ -23,7 +23,7 @@ public class SendNotificationFacadeTestConfiguration {
     public Map<NotificationTypeDictionary, SenderService> senderServiceMap() {
         Map<NotificationTypeDictionary, SenderService> sendersMap = new EnumMap<>(NotificationTypeDictionary.class);
         for (NotificationTypeDictionary type : NotificationTypeDictionary.values()) {
-            sendersMap.put(type, new SenderService() {
+            sendersMap.put(type, new AbstractSenderService() {
                 @Override
                 public NotificationTypeDictionary getType() {
                     return type;

@@ -19,6 +19,9 @@ public abstract class AbstractSenderService implements SenderService{
     }
 
     @Override
+    public void afterSending(Notification notification, boolean result) throws SendNotificationException {}
+
+    @Override
     public String getSendingResultMessage() {
         return resultMessage;
     }

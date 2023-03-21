@@ -19,9 +19,4 @@ public class FileSenderService extends AbstractSenderService {
         throw new AssertionError("Not implemented yet");
     }
 
-    @Override
-    public void afterSending(Notification notification, boolean result) throws SendNotificationException {
-
-    }
-
 }

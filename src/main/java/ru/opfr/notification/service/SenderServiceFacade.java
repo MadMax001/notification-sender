@@ -5,7 +5,7 @@ import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
 
-public interface SendNotificationFacade {
+public interface SenderServiceFacade {
     Response send(Request request) throws CreationNotificationException, SendNotificationException;
     Response sendNotificationWorkflow(Request request);
 }

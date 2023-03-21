@@ -37,7 +37,7 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.*;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = SendNotificationFacadeTestConfiguration.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class SendNotificationFacadeTest {
+class SenderServiceFacadeTest {
 
     @MockBean
     private final NotificationService notificationService;
@@ -45,7 +45,7 @@ class SendNotificationFacadeTest {
     private final RequestNotificationTransformerImpl requestNotificationTransformer;
     private final Map<NotificationTypeDictionary, SenderService> senderServiceMap;
 
-    private SendNotificationFacade facade;
+    private SenderServiceFacade facade;
 
     private final String modelRequestId = "remote-999";
     private final long modelNotificationId = 999L;
@@ -72,7 +72,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
 
 
         NotificationTypeDictionary type = MESSAGE;
@@ -120,7 +120,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
 
 
         NotificationTypeDictionary type = MESSAGE;
@@ -169,7 +169,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
 
 
         NotificationTypeDictionary type = MESSAGE;
@@ -216,7 +216,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
 
 
         NotificationTypeDictionary type = MESSAGE;
@@ -264,7 +264,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         when(notificationService.save(any(Notification.class))).thenReturn(null);
 
         Response response = facade.sendNotificationWorkflow(null);
@@ -295,7 +295,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         String messageException = "message!!!";
         Throwable persistException = new CreationNotificationException(messageException);
         when(notificationService.addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class))).thenThrow(persistException);
@@ -334,7 +334,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         mockAddStageAndSaveMethodInNotificationService();
 
         Request request = getRequestByType(EMAIL);
@@ -386,7 +386,7 @@ class SendNotificationFacadeTest {
             spiedSendersMap.put(mockSenderService.getType(), mockSenderService);
         }
 
-        facade = new SendNotificationFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
+        facade = new SenderServiceFacadeImpl(notificationService, spiedSendersMap, requestNotificationTransformer);
         mockAddStageAndSaveMethodInNotificationService();
 
         Request request = getRequestByType(EMAIL);

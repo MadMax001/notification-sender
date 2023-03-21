@@ -17,7 +17,7 @@ import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 
 @Service
 @RequiredArgsConstructor
-public class SendNotificationFacadeImpl implements SendNotificationFacade {
+public class SenderServiceFacadeImpl implements SenderServiceFacade {
     private final NotificationService notificationService;
     private final Map<NotificationTypeDictionary, SenderService> sendersMap;
     private final RequestNotificationTransformerImpl requestNotificationTransformer;

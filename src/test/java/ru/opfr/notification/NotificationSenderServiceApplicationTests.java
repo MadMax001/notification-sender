@@ -10,7 +10,7 @@ import ru.opfr.notification.reporitory.NotificationRepository;
 import ru.opfr.notification.reporitory.NotificationStageRepository;
 import ru.opfr.notification.service.NotificationService;
 import ru.opfr.notification.service.NotificationStageService;
-import ru.opfr.notification.service.SendNotificationFacade;
+import ru.opfr.notification.service.SenderServiceFacade;
 import ru.opfr.notification.service.SenderService;
 import ru.opfr.notification.transformers.RequestFileTransformer;
 import ru.opfr.notification.transformers.RequestNotificationTransformer;
@@ -32,7 +32,7 @@ class NotificationSenderServiceApplicationTests {
 		assertEquals(3, context.getBeansOfType(SenderService.class).entrySet().size());
 		assertNotNull(context.getBean(NotificationService.class));
 		assertNotNull(context.getBean(NotificationStageService.class));
-		assertNotNull(context.getBean(SendNotificationFacade.class));
+		assertNotNull(context.getBean(SenderServiceFacade.class));
 
 		assertNotNull(context.getBean(RequestFileTransformer.class));
 		assertNotNull(context.getBean(RequestNotificationTransformer.class));

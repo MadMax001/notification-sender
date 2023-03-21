@@ -13,9 +13,14 @@ public abstract class AbstractSenderService implements SenderService{
             afterSending(notification, result);
             return result;
         } catch (SendNotificationException e) {
-            resultMessage = e.getClass().getSimpleName() + ": " + e.getMessage();
-            return false;
+            return failByThrowable(notification, e);
         }
+    }
+
+    @Override
+    public boolean failByThrowable(Notification notification, Throwable e) {
+        resultMessage = e.getClass().getSimpleName() + ": " + e.getMessage();
+        return false;
     }
 
     @Override

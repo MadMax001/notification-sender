@@ -26,7 +26,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
         try {
             return send(request);
         } catch (SendNotificationException | CreationNotificationException e) {
-            return failResponseByThrowable(e, request);
+            return failByThrowable(request, e);
         }
     }
 
@@ -52,7 +52,8 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
         return notificationService.addStageWithMessageAndSave(RECEIVED, null, notification);
     }
 
-    private Response failResponseByThrowable(Exception e, Request request) {
+    @Override
+    public Response failByThrowable(Request request, Throwable e) {
         return Response.builder()
                 .remoteId(Objects.nonNull(request) ? request.id : null)
                 .operationId(null)
@@ -60,6 +61,4 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
                 .message(e.getClass().getSimpleName() + ": " + e.getMessage())
                 .build();
     }
-
-
 }

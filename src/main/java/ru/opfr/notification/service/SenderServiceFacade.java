@@ -8,4 +8,5 @@ import ru.opfr.notification.model.dto.Response;
 public interface SenderServiceFacade {
     Response send(Request request) throws CreationNotificationException, SendNotificationException;
     Response sendNotificationWorkflow(Request request);
+    Response failByThrowable(Request request, Throwable e);
 }

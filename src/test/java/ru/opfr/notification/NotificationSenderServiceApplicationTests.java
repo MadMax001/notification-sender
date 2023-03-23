@@ -8,15 +8,11 @@ import org.springframework.context.ApplicationContext;
 import ru.opfr.notification.reporitory.NotificationAttachmentRepository;
 import ru.opfr.notification.reporitory.NotificationRepository;
 import ru.opfr.notification.reporitory.NotificationStageRepository;
-import ru.opfr.notification.service.NotificationService;
-import ru.opfr.notification.service.NotificationStageService;
-import ru.opfr.notification.service.SenderServiceFacade;
-import ru.opfr.notification.service.SenderService;
+import ru.opfr.notification.service.*;
 import ru.opfr.notification.transformers.RequestFileTransformer;
 import ru.opfr.notification.transformers.RequestNotificationTransformer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -30,6 +26,8 @@ class NotificationSenderServiceApplicationTests {
 
 		assertNotNull(context.getBeansOfType(SenderService.class));
 		assertEquals(3, context.getBeansOfType(SenderService.class).entrySet().size());
+		assertEquals(1, context.getBeansOfType(EmailSenderService.class).entrySet().size());
+		assertNotNull(context.getBean(SMTPMailSender.class));
 		assertNotNull(context.getBean(NotificationService.class));
 		assertNotNull(context.getBean(NotificationStageService.class));
 		assertNotNull(context.getBean(SenderServiceFacade.class));

@@ -5,11 +5,19 @@ spring:
     properties:
       hibernate:
         format_sql: true
-
   servlet:
     multipart:
       max-file-size: 50B
       max-request-size: 1MB
+  mail:
+    host: 10.73.0.0
+    port: 25
+    username: user1
+    password: password1
+    properties:
+      mail:
+        smtp:
+          auth: true
 logging:
   level:
     org:
@@ -19,3 +27,7 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+app:
+  mail:
+    from: owner@server.info
+

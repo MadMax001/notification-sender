@@ -1,6 +1,7 @@
 package ru.opfr.notification.service;
 
 import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,79 +22,82 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class EmailSenderServiceTest {
     @MockBean
-    private final NotificationService notificationService;
+    final NotificationService notificationService;
 
     final EmailSenderService emailSenderService;
 
-
     @Test
-    void checkTYpe() {
+    void checkType() {
         assertEquals(EMAIL, emailSenderService.getType());
     }
 
-    @Test
-    void afterSendingRemovesAllAttachments_IfSuccessfulSend() throws SendNotificationException {
-        boolean success = true;
+    @Nested
+    class afterSendingTests {
+        @Test
+        void afterSendingRemovesAllAttachments_IfSuccessfulSend() throws SendNotificationException {
+            boolean success = true;
 
-        Notification notification = new Notification();
-        notification.setRemoteId("remote-id");
-        notification.setContent("Content");
-        notification.setType(EMAIL);
-        notification.setPerson(new Person());
-        notification.addStage(new NotificationStage());
-        notification.addAttachment(new NotificationAttachment());
+            Notification notification = new Notification();
+            notification.setRemoteId("remote-id");
+            notification.setContent("Content");
+            notification.setType(EMAIL);
+            notification.setPerson(new Person());
+            notification.addStage(new NotificationStage());
+            notification.addAttachment(new NotificationAttachment());
 
-        emailSenderService.afterSending(notification, success);
-        verify(notificationService).deleteAllAttachments(notification);
+            emailSenderService.afterSending(notification, success);
+            verify(notificationService).deleteAllAttachments(notification);
 
-    }
+        }
 
-    @Test
-    void afterSendingDoesNotRemoveAttachments_IfUnSuccessfulSend() throws SendNotificationException {
-        boolean success = false;
+        @Test
+        void afterSendingDoesNotRemoveAttachments_IfUnSuccessfulSend() throws SendNotificationException {
+            boolean success = false;
 
-        Notification notification = new Notification();
-        notification.setRemoteId("remote-id");
-        notification.setContent("Content");
-        notification.setType(EMAIL);
-        notification.setPerson(new Person());
-        notification.addStage(new NotificationStage());
-        notification.addAttachment(new NotificationAttachment());
+            Notification notification = new Notification();
+            notification.setRemoteId("remote-id");
+            notification.setContent("Content");
+            notification.setType(EMAIL);
+            notification.setPerson(new Person());
+            notification.addStage(new NotificationStage());
+            notification.addAttachment(new NotificationAttachment());
 
-        emailSenderService.afterSending(notification, success);
-        verify(notificationService, never()).deleteAllAttachments(notification);
-    }
+            emailSenderService.afterSending(notification, success);
+            verify(notificationService, never()).deleteAllAttachments(notification);
+        }
 
-    @Test
-    void afterSendingThrowExceptionInPersist_ThenTrowSendNotificationException() {
-        doThrow(ApplicationRuntimeException.class).when(notificationService).deleteAllAttachments(any(Notification.class));
-        boolean success = true;
+        @Test
+        void afterSendingThrowExceptionInPersist_ThenTrowSendNotificationException() {
+            doThrow(ApplicationRuntimeException.class).when(notificationService).deleteAllAttachments(any(Notification.class));
+            boolean success = true;
 
-        Notification notification = new Notification();
-        notification.setRemoteId("remote-id");
-        notification.setContent("Content");
-        notification.setType(EMAIL);
-        notification.setPerson(new Person());
-        notification.addStage(new NotificationStage());
-        notification.addAttachment(new NotificationAttachment());
+            Notification notification = new Notification();
+            notification.setRemoteId("remote-id");
+            notification.setContent("Content");
+            notification.setType(EMAIL);
+            notification.setPerson(new Person());
+            notification.addStage(new NotificationStage());
+            notification.addAttachment(new NotificationAttachment());
 
-        assertThrows(SendNotificationException.class, () -> emailSenderService.afterSending(notification, success));
-    }
+            assertThrows(SendNotificationException.class, () -> emailSenderService.afterSending(notification, success));
+        }
 
-    @Test
-    void afterSendingThrowNotApplicationException_ThenTrowException()  {
-        doThrow(RuntimeException.class).when(notificationService).deleteAllAttachments(any(Notification.class));
-        boolean success = true;
+        @Test
+        void afterSendingThrowNotApplicationException_ThenTrowException()  {
+            doThrow(RuntimeException.class).when(notificationService).deleteAllAttachments(any(Notification.class));
+            boolean success = true;
 
-        Notification notification = new Notification();
-        notification.setRemoteId("remote-id");
-        notification.setContent("Content");
-        notification.setType(EMAIL);
-        notification.setPerson(new Person());
-        notification.addStage(new NotificationStage());
-        notification.addAttachment(new NotificationAttachment());
+            Notification notification = new Notification();
+            notification.setRemoteId("remote-id");
+            notification.setContent("Content");
+            notification.setType(EMAIL);
+            notification.setPerson(new Person());
+            notification.addStage(new NotificationStage());
+            notification.addAttachment(new NotificationAttachment());
 
-        assertThrows(RuntimeException.class, () -> emailSenderService.afterSending(notification, success));
+            assertThrows(RuntimeException.class, () -> emailSenderService.afterSending(notification, success));
+        }
+
     }
 
 }

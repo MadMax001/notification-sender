@@ -16,7 +16,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class RequestNotificationTransformerImpl implements RequestNotificationTransformer {
 
-    private final RequestFileTransformerImpl requestFileTransformer;
+    protected final RequestFileTransformerImpl requestFileTransformer;
 
     public Notification transform(Request request) throws CreationNotificationException {
         checkForNullRequest(request);

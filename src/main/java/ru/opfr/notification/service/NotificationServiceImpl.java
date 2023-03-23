@@ -12,8 +12,8 @@ import ru.opfr.notification.reporitory.NotificationRepository;
 @Service
 @RequiredArgsConstructor
 public class NotificationServiceImpl implements NotificationService{
-    private final NotificationRepository notificationRepository;
-    private final NotificationStageService notificationStageService;
+    protected final NotificationRepository notificationRepository;
+    protected final NotificationStageService notificationStageService;
 
     public Notification save(Notification notification) throws CreationNotificationException {
         return notificationRepository.save(notification);

@@ -1,4 +1,4 @@
-package ru.opfr.notification.transformers;
+package ru.opfr.notification.converters;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -21,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @ContextHierarchy({
-        @ContextConfiguration(classes = RequestFileTransformerImpl.class),
-        @ContextConfiguration(classes = RequestNotificationTransformerImpl.class)
+        @ContextConfiguration(classes = RequestFileConverterImpl.class),
+        @ContextConfiguration(classes = RequestNotificationConverterImpl.class)
 })
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class RequestNotificationTransformerImplTest {
-    private final RequestNotificationTransformerImpl transformer;
+class RequestNotificationConverterImplTest {
+    private final RequestNotificationConverterImpl transformer;
 
     @Test
     void createEntityFromDTO_WithAllNonNullFields() throws CreationNotificationException {
@@ -38,7 +38,7 @@ class RequestNotificationTransformerImplTest {
         dto.email = "user@server.ru";
         dto.content = "Content";
         dto.theme = "theme";
-        Notification notification = transformer.transform(dto);
+        Notification notification = transformer.convert(dto);
 
         assertNotNull(notification);
         assertNull(notification.getId());
@@ -57,7 +57,7 @@ class RequestNotificationTransformerImplTest {
 
     @Test
     void createEntityFromNullDTO_andThrowException() {
-        assertThrows(CreationNotificationException.class, () -> transformer.transform(null));
+        assertThrows(CreationNotificationException.class, () -> transformer.convert(null));
     }
 
     @Test
@@ -71,7 +71,7 @@ class RequestNotificationTransformerImplTest {
         dto.content = "Content";
         dto.theme = "Theme";
 
-        Notification notification = transformer.transform(dto);
+        Notification notification = transformer.convert(dto);
         assertNull(notification.getType());
     }
 
@@ -86,7 +86,7 @@ class RequestNotificationTransformerImplTest {
         dto.content = "Content";
         dto.theme = "Theme";
 
-        Notification notification = transformer.transform(dto);
+        Notification notification = transformer.convert(dto);
         assertNull(notification.getType());
     }
 
@@ -102,7 +102,7 @@ class RequestNotificationTransformerImplTest {
                 new MockMultipartFile("file1", "file1", null, "Content number 1".getBytes()),
                 new MockMultipartFile("file2", "file2", null, "Content number 2".getBytes()),
         };
-        Notification notificationWithFiles = transformer.transform(dto);
+        Notification notificationWithFiles = transformer.convert(dto);
 
         assertNotNull(notificationWithFiles);
         assertEquals(2, notificationWithFiles.getAttachments().size());

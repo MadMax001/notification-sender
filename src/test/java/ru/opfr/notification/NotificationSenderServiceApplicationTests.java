@@ -9,8 +9,8 @@ import ru.opfr.notification.reporitory.NotificationAttachmentRepository;
 import ru.opfr.notification.reporitory.NotificationRepository;
 import ru.opfr.notification.reporitory.NotificationStageRepository;
 import ru.opfr.notification.service.*;
-import ru.opfr.notification.transformers.RequestFileTransformer;
-import ru.opfr.notification.transformers.RequestNotificationTransformer;
+import ru.opfr.notification.converters.RequestFileConverter;
+import ru.opfr.notification.converters.RequestNotificationConverter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,8 +32,8 @@ class NotificationSenderServiceApplicationTests {
 		assertNotNull(context.getBean(NotificationStageService.class));
 		assertNotNull(context.getBean(SenderServiceFacade.class));
 
-		assertNotNull(context.getBean(RequestFileTransformer.class));
-		assertNotNull(context.getBean(RequestNotificationTransformer.class));
+		assertNotNull(context.getBean(RequestFileConverter.class));
+		assertNotNull(context.getBean(RequestNotificationConverter.class));
 
 		assertNotNull(context.getBean(NotificationSenderServiceConfiguration.class));
 	}

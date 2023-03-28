@@ -1,11 +1,11 @@
-package ru.opfr.notification.transformers;
+package ru.opfr.notification.converters;
 
 import org.springframework.web.multipart.MultipartFile;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.NotificationAttachment;
 
 
-public interface RequestFileTransformer {
+public interface RequestFileConverter {
 
-    NotificationAttachment transform(MultipartFile file) throws CreationNotificationException;
+    NotificationAttachment convert(MultipartFile file) throws CreationNotificationException;
 }

@@ -1,4 +1,4 @@
-package ru.opfr.notification.converters;
+package ru.opfr.notification.transformers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -14,11 +14,11 @@ import java.util.Objects;
 
 @Component
 @RequiredArgsConstructor
-public class RequestNotificationConverterImpl implements RequestNotificationConverter {
+public class RequestNotificationTransformerImpl implements RequestNotificationTransformer {
 
-    protected final RequestFileConverterImpl requestFileTransformer;
+    protected final RequestFileTransformerImpl requestFileTransformer;
 
-    public Notification convert(Request request) throws CreationNotificationException {
+    public Notification transform(Request request) throws CreationNotificationException {
         checkForNullRequest(request);
 
         Notification notification = new Notification();
@@ -47,7 +47,7 @@ public class RequestNotificationConverterImpl implements RequestNotificationConv
     private void setFilesIntoNotification(MultipartFile[] files, Notification notification) throws CreationNotificationException {
         if (Objects.nonNull(files)) {
             for (MultipartFile file : files)
-                notification.addAttachment(requestFileTransformer.convert(file));
+                notification.addAttachment(requestFileTransformer.transform(file));
         }
     }
 

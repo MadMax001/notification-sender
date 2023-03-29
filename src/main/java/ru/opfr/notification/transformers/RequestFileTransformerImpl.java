@@ -1,4 +1,4 @@
-package ru.opfr.notification.converters;
+package ru.opfr.notification.transformers;
 
 
 import org.springframework.stereotype.Component;
@@ -9,9 +9,9 @@ import ru.opfr.notification.model.NotificationAttachment;
 import java.io.IOException;
 
 @Component
-public class RequestFileConverterImpl implements RequestFileConverter {
+public class RequestFileTransformerImpl implements RequestFileTransformer{
     @Override
-    public NotificationAttachment convert(MultipartFile file) throws CreationNotificationException {
+    public NotificationAttachment transform(MultipartFile file) throws CreationNotificationException {
         NotificationAttachment attachment = new NotificationAttachment();
         attachment.setName(file.getName());
         try {

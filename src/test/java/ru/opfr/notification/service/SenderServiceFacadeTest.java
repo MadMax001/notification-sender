@@ -20,7 +20,7 @@ import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.*;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
-import ru.opfr.notification.converters.RequestNotificationConverterImpl;
+import ru.opfr.notification.transformers.RequestNotificationTransformerImpl;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -42,7 +42,7 @@ class SenderServiceFacadeTest {
     @MockBean
     private final NotificationService notificationService;
     @SpyBean
-    private final RequestNotificationConverterImpl requestNotificationTransformer;
+    private final RequestNotificationTransformerImpl requestNotificationTransformer;
     private final Map<NotificationTypeDictionary, SenderService> senderServiceMap;
 
     private SenderServiceFacade facade;
@@ -83,7 +83,7 @@ class SenderServiceFacadeTest {
 
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
         verify(notificationService, never()).save(any(Notification.class));
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(PROCESSED), eq(PROCESSED_STAGE_MESSAGE), any(Notification.class));
@@ -131,7 +131,7 @@ class SenderServiceFacadeTest {
 
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
         verify(notificationService, never()).save(any(Notification.class));
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(PROCESSED), isNull(), any(Notification.class));
@@ -179,7 +179,7 @@ class SenderServiceFacadeTest {
         mockAddStageAndSaveMethodInNotificationService();
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
 
         verify(notificationService, never()).save(any(Notification.class));
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
@@ -226,7 +226,7 @@ class SenderServiceFacadeTest {
         mockAddStageAndSaveMethodInNotificationService();
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
 
         verify(notificationService, never()).save(any(Notification.class));
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
@@ -269,7 +269,7 @@ class SenderServiceFacadeTest {
 
         Response response = facade.sendNotificationWorkflow(null);
 
-        verify(requestNotificationTransformer).convert(null);
+        verify(requestNotificationTransformer).transform(null);
         verify(notificationService, never()).save(any(Notification.class));
         verify(notificationService, never()).addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), isNull(), any(Notification.class));
         for (Map.Entry<NotificationTypeDictionary, SenderService> serviceEntry : spiedSendersMap.entrySet()) {
@@ -303,7 +303,7 @@ class SenderServiceFacadeTest {
         Request request = getRequestByType(FILE);
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
         verify(notificationService, never()).save(any(Notification.class));
 
@@ -340,7 +340,7 @@ class SenderServiceFacadeTest {
         Request request = getRequestByType(EMAIL);
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
         verify(notificationService, never()).save(any(Notification.class));
 
@@ -392,7 +392,7 @@ class SenderServiceFacadeTest {
         Request request = getRequestByType(EMAIL);
         Response response = facade.sendNotificationWorkflow(request);
 
-        verify(requestNotificationTransformer).convert(request);
+        verify(requestNotificationTransformer).transform(request);
         verify(notificationService, times(1)).addStageWithMessageAndSave(eq(RECEIVED), isNull(), any(Notification.class));
 //        verify(notificationService, times(1)).addStageWithMessageAndSave(eq(FAILED), any(String.class), any(Notification.class));
         verify(notificationService, never()).save(any(Notification.class));

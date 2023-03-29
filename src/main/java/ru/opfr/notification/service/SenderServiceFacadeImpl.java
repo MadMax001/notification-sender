@@ -10,7 +10,7 @@ import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
-import ru.opfr.notification.converters.RequestNotificationConverterImpl;
+import ru.opfr.notification.transformers.RequestNotificationTransformerImpl;
 
 import java.util.Map;
 import java.util.Objects;
@@ -22,7 +22,7 @@ import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 public class SenderServiceFacadeImpl implements SenderServiceFacade {
     protected final NotificationService notificationService;
     protected final Map<NotificationTypeDictionary, SenderService> sendersMap;
-    protected final RequestNotificationConverterImpl requestNotificationTransformer;
+    protected final RequestNotificationTransformerImpl requestNotificationTransformer;
 
     public Response sendNotificationWorkflow(Request request) {
         try {
@@ -51,7 +51,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
     }
 
     private Notification saveNotificationByRequest(Request request) throws CreationNotificationException {
-        Notification notification = requestNotificationTransformer.convert(request);
+        Notification notification = requestNotificationTransformer.transform(request);
         return notificationService.addStageWithMessageAndSave(RECEIVED, null, notification);
     }
 

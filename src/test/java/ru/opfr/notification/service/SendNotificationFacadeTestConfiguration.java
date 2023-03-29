@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Bean;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
-import ru.opfr.notification.converters.RequestFileConverterImpl;
-import ru.opfr.notification.converters.RequestNotificationConverterImpl;
+import ru.opfr.notification.transformers.RequestFileTransformerImpl;
+import ru.opfr.notification.transformers.RequestNotificationTransformerImpl;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -15,8 +15,8 @@ import java.util.Map;
 @TestConfiguration
 public class SendNotificationFacadeTestConfiguration {
     @Bean
-    public RequestNotificationConverterImpl requestNotificationTransformer() {
-        return new RequestNotificationConverterImpl(new RequestFileConverterImpl());
+    public RequestNotificationTransformerImpl requestNotificationTransformer() {
+        return new RequestNotificationTransformerImpl(new RequestFileTransformerImpl());
     }
 
     @Bean

@@ -1,4 +1,4 @@
-package ru.opfr.notification.converters;
+package ru.opfr.notification.transformers;
 
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
@@ -19,10 +19,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = RequestFileConverterImpl.class)
+@ContextConfiguration(classes = RequestFileTransformerImpl.class)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class RequestFileConverterImplTest {
-    private final RequestFileConverter transformer;
+class RequestFileTransformerImplTest {
+    private final RequestFileTransformer transformer;
 
 
     @Test
@@ -33,7 +33,7 @@ class RequestFileConverterImplTest {
         };
         List<NotificationAttachment> filesList= new ArrayList<>();
         for (MultipartFile file : files) {
-            filesList.add(transformer.convert(file));
+            filesList.add(transformer.transform(file));
         }
 
         assertEquals("file1", filesList.get(0).getName());
@@ -50,7 +50,7 @@ class RequestFileConverterImplTest {
         MultipartFile mockFile = spy(file);
         doThrow(IOException.class).when(mockFile).getBytes();
 
-        assertThrows(CreationNotificationException.class, () -> transformer.convert(mockFile));
+        assertThrows(CreationNotificationException.class, () -> transformer.transform(mockFile));
 
     }
 }

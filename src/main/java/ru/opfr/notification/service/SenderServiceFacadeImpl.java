@@ -2,6 +2,8 @@ package ru.opfr.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.Notification;
@@ -31,6 +33,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
     }
 
     @Override
+    @Transactional(propagation = Propagation.NEVER)
     public Response send(Request request) throws CreationNotificationException, SendNotificationException {
         Notification notification = saveNotificationByRequest(request);
         SenderService service = sendersMap.get(notification.getType());

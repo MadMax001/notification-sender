@@ -2,6 +2,8 @@ package ru.opfr.notification.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import ru.opfr.notification.exception.ApplicationRuntimeException;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
@@ -20,12 +22,14 @@ public class NotificationServiceImpl implements NotificationService{
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Notification addStageWithMessageAndSave(NotificationProcessStageDictionary stage, String message, Notification notification) throws CreationNotificationException {
         notification.addStage(notificationStageService.createdStageByDictionaryWithMessage(stage, message));
         return save(notification);
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void deleteAllAttachments(Notification notification) {
         notification.clearAttachments();
         try {

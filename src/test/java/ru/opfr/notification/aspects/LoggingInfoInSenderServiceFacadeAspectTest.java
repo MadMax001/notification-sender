@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
-import ru.opfr.notification.aspects.service.LogService;
+import ru.opfr.notification.aspects.logging.LogType;
+import ru.opfr.notification.aspects.logging.service.LogService;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationProcessStageDictionary;
@@ -67,8 +68,8 @@ class LoggingInfoInSenderServiceFacadeAspectTest {
                 .build();
         senderServiceFacade.send(request);
 
-        verify(logService).info(messageArgumentCaptorForInput.capture(), eq(LogInfoMode.INPUT));
-        verify(logService).info(messageArgumentCaptorForOutput.capture(), eq(LogInfoMode.OUTPUT));
+        verify(logService).info(messageArgumentCaptorForInput.capture(), eq(LogType.INPUT));
+        verify(logService).info(messageArgumentCaptorForOutput.capture(), eq(LogType.OUTPUT));
 
         String messageInput = messageArgumentCaptorForInput.getValue();
         String messageOutput = messageArgumentCaptorForOutput.getValue();
@@ -86,8 +87,8 @@ class LoggingInfoInSenderServiceFacadeAspectTest {
         Request request = getRequestByType(EMAIL);
         Assertions.assertThrows(CreationNotificationException.class, () -> senderServiceFacade.send(request));
 
-        verify(logService).info(messageArgumentCaptorForInput.capture(), eq(LogInfoMode.INPUT));
-        verify(logService, never()).info(messageArgumentCaptorForOutput.capture(), eq(LogInfoMode.OUTPUT));
+        verify(logService).info(messageArgumentCaptorForInput.capture(), eq(LogType.INPUT));
+        verify(logService, never()).info(messageArgumentCaptorForOutput.capture(), eq(LogType.OUTPUT));
 
         String messageInput = messageArgumentCaptorForInput.getValue();
 
@@ -102,8 +103,8 @@ class LoggingInfoInSenderServiceFacadeAspectTest {
         Request request = getRequestByType(EMAIL);
         Assertions.assertThrows(RuntimeException.class, () -> senderServiceFacade.send(request));
 
-        verify(logService).info(messageArgumentCaptorForInput.capture(), eq(LogInfoMode.INPUT));
-        verify(logService, never()).info(messageArgumentCaptorForOutput.capture(), eq(LogInfoMode.OUTPUT));
+        verify(logService).info(messageArgumentCaptorForInput.capture(), eq(LogType.INPUT));
+        verify(logService, never()).info(messageArgumentCaptorForOutput.capture(), eq(LogType.OUTPUT));
 
         String messageInput = messageArgumentCaptorForInput.getValue();
 

@@ -4,8 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import ru.opfr.notification.aspects.LogError;
-import ru.opfr.notification.aspects.LogInfo;
+import ru.opfr.notification.aspects.logging.Log;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
@@ -26,8 +25,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
     protected final RequestNotificationConverterImpl requestNotificationTransformer;
 
     @Override
-    @LogError(values = {CreationNotificationException.class, RuntimeException.class})
-    @LogInfo
+    @Log(errors = {CreationNotificationException.class, RuntimeException.class})
     @Transactional(propagation = Propagation.NEVER)
     public Response send(Request request) throws CreationNotificationException {
         Notification notification = saveNotificationByRequest(request);

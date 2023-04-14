@@ -1,8 +1,8 @@
-package ru.opfr.notification.aspects.service;
+package ru.opfr.notification.aspects.logging.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.opfr.notification.aspects.LogInfoMode;
+import ru.opfr.notification.aspects.logging.LogType;
 
 @Service
 @Slf4j
@@ -13,8 +13,8 @@ public class LogServiceImpl implements LogService{
     }
 
     @Override
-    public void info(String info, LogInfoMode logInfoMode) {
-        log.info(logInfoMode.name() + ": " + info);
+    public void info(String info, LogType logType) {
+        log.info(logType.name() + ": " + info);
     }
 
     @Override

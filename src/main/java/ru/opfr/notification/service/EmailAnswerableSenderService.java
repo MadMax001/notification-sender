@@ -2,7 +2,7 @@ package ru.opfr.notification.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import ru.opfr.notification.aspects.LogError;
+import ru.opfr.notification.aspects.logging.Log;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationAttachment;
@@ -18,6 +18,8 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import java.util.Properties;
+
+import static ru.opfr.notification.aspects.logging.LogType.ERROR;
 
 @Service
 public class EmailAnswerableSenderService extends EmailSenderService {
@@ -60,7 +62,7 @@ public class EmailAnswerableSenderService extends EmailSenderService {
     }
 
     @Override
-    @LogError(values = {SendNotificationException.class})
+    @Log(what={ERROR}, errors = {SendNotificationException.class})
     public boolean send(Notification notification) throws SendNotificationException {
         try {
             Session session = Session.getInstance(connectionProperties, authenticator);

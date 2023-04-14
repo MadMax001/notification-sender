@@ -106,7 +106,7 @@ public class EmailAnswerableSenderService extends EmailSenderService {
     }
 
     private void setResultMessage(SMTPServerAnswer serverAnswer) {
-        resultMessage = serverAnswer.code + ": " + serverAnswer.message;
+        resultMessage = serverAnswer.toString();
     }
 
 

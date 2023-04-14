@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import ru.opfr.notification.aspects.LogError;
+import ru.opfr.notification.aspects.LogInfo;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
@@ -26,6 +27,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
 
     @Override
     @LogError(values = {CreationNotificationException.class, RuntimeException.class})
+    @LogInfo
     @Transactional(propagation = Propagation.NEVER)
     public Response send(Request request) throws CreationNotificationException {
         Notification notification = saveNotificationByRequest(request);

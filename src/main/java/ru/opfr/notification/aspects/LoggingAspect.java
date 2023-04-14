@@ -2,12 +2,12 @@ package ru.opfr.notification.aspects;
 
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterThrowing;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.annotation.*;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import ru.opfr.notification.aspects.service.LogService;
+
+import static ru.opfr.notification.aspects.LogInfoMode.*;
 
 @Aspect
 @Component
@@ -16,10 +16,13 @@ public class LoggingAspect {
     private final LogService logService;
 
     @Pointcut("@annotation(LogError) && args(object)")
-    public void anyObjectInServiceBeanPointcut(Object object) {}
+    public void anyObjectInServiceBeanErrorPointcut(Object object) {}
 
-    @AfterThrowing(pointcut = "anyObjectInServiceBeanPointcut(object)", throwing = "ex")
-    public void serviceAndConstraintAfterThrowingLog(JoinPoint joinPoint, Throwable ex, Object object) {
+    @Pointcut("@annotation(LogInfo) && args(object)")
+    public void anyObjectInServiceBeanInfoPointcut(Object object) {}
+
+    @AfterThrowing(pointcut = "anyObjectInServiceBeanErrorPointcut(object)", throwing = "ex")
+    public void logError(JoinPoint joinPoint, Throwable ex, Object object) {
         LogError logError = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(LogError.class);
         if (isAppropriateException(logError.values(), ex)) {
             String message = joinPoint.getSignature().getDeclaringType().getSimpleName() +
@@ -40,4 +43,31 @@ public class LoggingAspect {
         }
         return false;
     }
+
+    @Before("anyObjectInServiceBeanInfoPointcut(object)")
+    public void logInfoBefore(JoinPoint joinPoint, Object object) {
+        LogInfo logInfo = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(LogInfo.class);
+        if (isLogBeforeInvoking(logInfo.mode())) {
+            logService.info(object.toString(), INPUT);
+        }
+    }
+
+
+    @AfterReturning(pointcut = "anyObjectInServiceBeanInfoPointcut(object)", returning = "result")
+    public void logInfoAfter(JoinPoint joinPoint, Object object, Object result) {
+        LogInfo logInfo = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(LogInfo.class);
+        if (isLogAfterInvoking(logInfo.mode())) {
+            logService.info(result.toString(), OUTPUT);
+        }
+    }
+
+
+    private boolean isLogBeforeInvoking(LogInfoMode mode) {
+        return mode == ALL || mode == INPUT;
+    }
+
+    private boolean isLogAfterInvoking(LogInfoMode mode) {
+        return mode == ALL || mode == OUTPUT;
+    }
+
 }

@@ -2,6 +2,7 @@ package ru.opfr.notification.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.opfr.notification.aspects.LogError;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationAttachment;
@@ -59,6 +60,7 @@ public class EmailAnswerableSenderService extends EmailSenderService {
     }
 
     @Override
+    @LogError
     public boolean send(Notification notification) throws SendNotificationException {
         try {
             Session session = Session.getInstance(connectionProperties, authenticator);

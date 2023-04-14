@@ -33,7 +33,7 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ActiveProfiles("repo_test")
 class EmailAnswerableSenderServiceTest {
-    final EmailSenderService emailSenderService;
+    final EmailSenderService emailAnswerableSenderService;
 
     @MockBean
     SMTPMailSender mailSender;
@@ -58,10 +58,10 @@ class EmailAnswerableSenderServiceTest {
         notification.setTheme("Theme of message");
         notification.setContent("Content of letter");
 
-        boolean result = emailSenderService.send(notification);
+        boolean result = emailAnswerableSenderService.send(notification);
         assertTrue(result);
-        assertTrue(emailSenderService.getSendingResultMessage().contains(answerMessage));
-        assertTrue(emailSenderService.getSendingResultMessage().contains(String.valueOf(answerCode)));
+        assertTrue(emailAnswerableSenderService.getSendingResultMessage().contains(answerMessage));
+        assertTrue(emailAnswerableSenderService.getSendingResultMessage().contains(String.valueOf(answerCode)));
         verify(mailSender).send(sessionCaptor.capture(), mimeMessageCaptor.capture());
 
         MimeMessage emailMessage = mimeMessageCaptor.getValue();
@@ -97,7 +97,7 @@ class EmailAnswerableSenderServiceTest {
         notification.setTheme("Theme of message");
         notification.setContent("Content of letter");
 
-        boolean result = emailSenderService.send(notification);
+        boolean result = emailAnswerableSenderService.send(notification);
         assertFalse(result);
     }
 
@@ -112,7 +112,7 @@ class EmailAnswerableSenderServiceTest {
         notification.setContent("Content of letter");
 
         doThrow(new MessagingException("error"){}).when(mailSender).send(any(Session.class), any(Message.class));
-        assertThrows(SendNotificationException.class, () -> emailSenderService.send(notification));
+        assertThrows(SendNotificationException.class, () -> emailAnswerableSenderService.send(notification));
     }
 
     @Test
@@ -136,10 +136,10 @@ class EmailAnswerableSenderServiceTest {
         attachment.setContent(fileContentByteArray);
         notification.addAttachment(attachment);
 
-        boolean result = emailSenderService.send(notification);
+        boolean result = emailAnswerableSenderService.send(notification);
         assertTrue(result);
-        assertTrue(emailSenderService.getSendingResultMessage().contains(answerMessage));
-        assertTrue(emailSenderService.getSendingResultMessage().contains(String.valueOf(answerCode)));
+        assertTrue(emailAnswerableSenderService.getSendingResultMessage().contains(answerMessage));
+        assertTrue(emailAnswerableSenderService.getSendingResultMessage().contains(String.valueOf(answerCode)));
         verify(mailSender).send(any(Session.class), mimeMessageCaptor.capture());
 
         MimeMessage emailMessage = mimeMessageCaptor.getValue();

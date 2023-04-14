@@ -136,4 +136,34 @@ class NotificationTest {
 
         assertNotEquals(0, notification1.hashCode() );
     }
+
+    @Test
+    void toStringForEmptyObject() {
+        Notification notification = new Notification();
+        assertDoesNotThrow(notification::toString);
+    }
+
+    @Test
+    void toStringWithEmptyPerson() {
+        LocalDateTime creationTime = LocalDateTime.now();
+        LocalDateTime updateTime = LocalDateTime.now();
+        Notification notification = new Notification();
+
+        NotificationStage stage1 = new NotificationStage();
+        NotificationStage stage2 = new NotificationStage();
+        List<NotificationStage> stagesList = Arrays.asList(stage1, stage2);
+
+        notification.setId(5L);
+        notification.setContent("content");
+        notification.setTheme("Theme");
+        notification.setPerson(null);
+        notification.setCreated(creationTime);
+        notification.setUpdated(updateTime);
+        notification.setRemoteId("remote-id");
+        notification.setStages(stagesList);
+        notification.setType(EMAIL);
+
+        assertDoesNotThrow(notification::toString);
+    }
+
 }

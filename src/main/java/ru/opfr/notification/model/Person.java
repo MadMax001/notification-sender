@@ -36,4 +36,13 @@ public class Person {
     public int hashCode() {
         return Objects.hash(user, ip, email);
     }
+
+    @Override
+    public String toString() {
+        return "Person{" +
+                "user='" + user + '\'' +
+                ", ip='" + ip + '\'' +
+                ", email='" + email + '\'' +
+                '}';
+    }
 }

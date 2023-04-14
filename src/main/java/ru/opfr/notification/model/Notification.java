@@ -11,9 +11,8 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static javax.persistence.FetchType.LAZY;
 import static ru.opfr.notification.ApplicationConstants.*;
@@ -108,4 +107,20 @@ public class Notification {
         return Objects.hash(id, remoteId, type, stages, updated, created, person, content, theme);
     }
 
+    @Override
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.LL.yyyy HH:mm:ss");
+        return "Notification{" +
+                "id=" + Optional.ofNullable(id).orElse(0L) +
+                ", remoteId='" + remoteId + '\'' +
+                ", type=" + Optional.ofNullable(type).map(NotificationTypeDictionary::toString).orElse("not defined") +
+                ", stages=" + Optional.ofNullable(stages).map(Collection::size).orElse(0) +
+                ", updated=" + Optional.ofNullable(updated).map(upd -> upd.format(formatter)).orElse("") +
+                ", created=" + Optional.ofNullable(created).map(crt -> crt.format(formatter)).orElse("") +
+                ", person=" + Optional.ofNullable(person).map(Person::toString).orElse("not defined") +
+                ", content='" + content + '\'' +
+                ", theme='" + theme + '\'' +
+                ", attachments=" + Optional.ofNullable(attachments).map(Collection::size).orElse(0) +
+                '}';
+    }
 }

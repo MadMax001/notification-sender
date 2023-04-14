@@ -1,6 +1,8 @@
 spring:
   main:
     banner-mode: off
+ # aop:
+ #   proxy-target-class: false
   jpa:
     hibernate:
       ddl-auto: validate
@@ -29,6 +31,9 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+  file:
+    path: logs/test
+    max-size: 10Mb
 app:
   mail:
     from: owner@server.info

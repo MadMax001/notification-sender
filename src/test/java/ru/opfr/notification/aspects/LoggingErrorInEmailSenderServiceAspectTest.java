@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import ru.opfr.notification.aspects.service.LogService;
+import ru.opfr.notification.exception.ApplicationRuntimeException;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
@@ -65,24 +66,25 @@ class LoggingErrorInEmailSenderServiceAspectTest {
     }
 
     @Test
-    void throwsRuntimeException_InEmailSenderService_AndLogThisError() throws MessagingException {
+    void throwsRuntimeException_InEmailSenderService_AndLoggingDoesNotInvoking_BecauseOfRTEDoesNotDeclare() throws MessagingException {
         Throwable throwable = new RuntimeException("Runtime Error in sending process");
         doThrow(throwable).when(mailSender).send(any(), any());
         Notification notification = getNotificationByType(EMAIL);
 
         assertThrows(RuntimeException.class, () -> senderServiceSafeWrapper.safeSend(notification));
 
-        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
-        String message = messageArgumentCaptor.getValue();
-        Throwable error = throwableArgumentCaptor.getValue();
-        assertTrue(error instanceof RuntimeException);
-        assertTrue(error.getMessage().contains("Runtime Error in sending process"));
-        assertTrue(message.contains("send"), "Name of method is \"send\"");
-        assertTrue(message.contains("EmailAnswerableSenderService"), "Name of class is \"EmailAnswerableSenderService\"");
-        assertTrue(message.contains("user@server.ru"));
-        assertTrue(message.contains("Theme"));
-        assertTrue(message.contains("content in message!"));
+        verify(logService, never()).error(any(), any());
+    }
 
+    @Test
+    void throwsSubRuntimeException_InEmailSenderService_AndLoggingDoesNotInvoking_BecauseOfRTEDoesNotDeclare() throws MessagingException {
+        Throwable throwable = new ApplicationRuntimeException(new Exception("Application runtime Error in sending process"));
+        doThrow(throwable).when(mailSender).send(any(), any());
+        Notification notification = getNotificationByType(EMAIL);
+
+        assertThrows(ApplicationRuntimeException.class, () -> senderServiceSafeWrapper.safeSend(notification));
+
+        verify(logService, never()).error(any(), any());
     }
 
     @Test

@@ -72,8 +72,29 @@ class LoggingErrorInSenderServiceFacadeAspectTest {
 
 
     @Test
-    void throwsApplicationRuntimeException_InNotificationSendProcess_AndLogThisError() throws CreationNotificationException {
-        Throwable throwable = new ApplicationRuntimeException(new Exception("Error message"));
+    void throwsRuntimeException_InNotificationSendFacadeProcess_AndLogThisError() throws CreationNotificationException {
+        Throwable throwable = new RuntimeException("Runtime Error message");
+        when(notificationService.addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), any(), any(Notification.class)))
+                .thenThrow(throwable);
+
+        Request request = getRequestByType(MESSAGE);
+        assertThrows(RuntimeException.class, () -> senderServiceFacadeSafeWrapper.safeSend(request));
+
+        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+        String message = messageArgumentCaptor.getValue();
+        Throwable error = throwableArgumentCaptor.getValue();
+        assertTrue(error instanceof RuntimeException);
+        assertTrue(error.getMessage().contains("Runtime Error message"));
+        assertTrue(message.contains("send"), "Name of method is \"send\"");
+        assertTrue(message.contains("SenderServiceFacadeImpl"), "Name of class is \"SenderServiceFacadeImpl\"");
+        assertTrue(message.contains("user@server.ru"));
+        assertTrue(message.contains("Theme"));
+        assertTrue(message.contains("content in message!"));
+    }
+
+    @Test
+    void throwsSubRuntimeException_InNotificationSendFacadeProcess_AndLogThisError() throws CreationNotificationException {
+        Throwable throwable = new ApplicationRuntimeException(new Exception("Application Runtime Error message"));
         when(notificationService.addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), any(), any(Notification.class)))
                 .thenThrow(throwable);
 
@@ -83,8 +104,8 @@ class LoggingErrorInSenderServiceFacadeAspectTest {
         verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
         String message = messageArgumentCaptor.getValue();
         Throwable error = throwableArgumentCaptor.getValue();
-        assertTrue(error instanceof ApplicationRuntimeException);
-        assertTrue(error.getMessage().contains("Error message"));
+        assertTrue(error instanceof RuntimeException);
+        assertTrue(error.getMessage().contains("Runtime Error message"));
         assertTrue(message.contains("send"), "Name of method is \"send\"");
         assertTrue(message.contains("SenderServiceFacadeImpl"), "Name of class is \"SenderServiceFacadeImpl\"");
         assertTrue(message.contains("user@server.ru"));
@@ -93,7 +114,7 @@ class LoggingErrorInSenderServiceFacadeAspectTest {
     }
 
     @Test
-    void throwsRuntimeException_InSenderServiceProcess_AndLogThisErrorTwice() throws CreationNotificationException, MessagingException {
+    void throwsRuntimeException_InSenderServiceProcess_AndLogThisErrorOnce() throws CreationNotificationException, MessagingException {
         Throwable throwable = new RuntimeException("Runtime Error in sending process");
         doThrow(throwable).when(mailSender).send(any(), any());
         when(notificationService.addStageWithMessageAndSave(any(), any(), any(Notification.class))).thenAnswer(invocation -> {
@@ -104,7 +125,31 @@ class LoggingErrorInSenderServiceFacadeAspectTest {
         Request request = getRequestByType(EMAIL);
         assertThrows(RuntimeException.class, () -> senderServiceFacadeSafeWrapper.safeSend(request));
 
-        verify(logService, times(2)).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+        String message = messageArgumentCaptor.getValue();
+        Throwable error = throwableArgumentCaptor.getValue();
+        assertTrue(error instanceof RuntimeException);
+        assertTrue(error.getMessage().contains("Runtime Error in sending process"));
+        assertTrue(message.contains("send"), "Name of method is \"send\"");
+        assertTrue(message.contains("SenderServiceFacadeImpl"), "Name of class is \"SenderServiceFacadeImpl\"");
+        assertTrue(message.contains("user@server.ru"));
+        assertTrue(message.contains("Theme"));
+        assertTrue(message.contains("content in message!"));
+    }
+
+    @Test
+    void throwsSubRuntimeException_InSenderServiceProcess_AndLogThisErrorOnce() throws CreationNotificationException, MessagingException {
+        Throwable throwable = new ApplicationRuntimeException(new Exception("Application Runtime Error in sending process"));
+        doThrow(throwable).when(mailSender).send(any(), any());
+        when(notificationService.addStageWithMessageAndSave(any(), any(), any(Notification.class))).thenAnswer(invocation -> {
+            Notification notification = invocation.getArgument(2);
+            return notification;
+        });
+
+        Request request = getRequestByType(EMAIL);
+        assertThrows(ApplicationRuntimeException.class, () -> senderServiceFacadeSafeWrapper.safeSend(request));
+
+        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
         String message = messageArgumentCaptor.getValue();
         Throwable error = throwableArgumentCaptor.getValue();
         assertTrue(error instanceof RuntimeException);

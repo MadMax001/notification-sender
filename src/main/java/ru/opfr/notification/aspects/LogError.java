@@ -11,4 +11,5 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Retention(RUNTIME)
 @Target({METHOD})
 public @interface LogError {
+    Class<? extends Throwable>[] values() default {};
 }

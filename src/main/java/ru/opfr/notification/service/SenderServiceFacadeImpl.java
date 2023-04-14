@@ -25,7 +25,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
     protected final RequestNotificationConverterImpl requestNotificationTransformer;
 
     @Override
-    @LogError
+    @LogError(values = {CreationNotificationException.class, RuntimeException.class})
     @Transactional(propagation = Propagation.NEVER)
     public Response send(Request request) throws CreationNotificationException {
         Notification notification = saveNotificationByRequest(request);

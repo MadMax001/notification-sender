@@ -60,7 +60,7 @@ public class EmailAnswerableSenderService extends EmailSenderService {
     }
 
     @Override
-    @LogError
+    @LogError(values = {SendNotificationException.class})
     public boolean send(Notification notification) throws SendNotificationException {
         try {
             Session session = Session.getInstance(connectionProperties, authenticator);

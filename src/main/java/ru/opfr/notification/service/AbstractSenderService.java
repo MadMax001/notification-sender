@@ -16,6 +16,6 @@ public abstract class AbstractSenderService implements SenderService{
 
     @Override
     public void setErrorMessage(Throwable e) {
-        resultMessage = e.getClass().getSimpleName() + ": " + e.getMessage();
+        resultMessage = e.toString();
     }
 }

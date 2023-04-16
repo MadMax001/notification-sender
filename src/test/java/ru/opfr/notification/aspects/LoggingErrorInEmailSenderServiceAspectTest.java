@@ -59,7 +59,7 @@ class LoggingErrorInEmailSenderServiceAspectTest {
         assertTrue(error instanceof SendNotificationException);
         assertTrue(error.getMessage().contains("Error in sending process"));
         assertTrue(message.contains("send"), "Name of method is \"send\"");
-        assertTrue(message.contains("EmailAnswerableSenderService"), "Name of class is \"EmailAnswerableSenderService\"");
+        assertTrue(message.contains("EmailSenderService"), "Name of class is \"EmailSenderService\"");
         assertTrue(message.contains("user@server.ru"));
         assertTrue(message.contains("Theme"));
         assertTrue(message.contains("content in message!"));

@@ -8,4 +8,9 @@ public class CreationNotificationException extends Exception {
     public CreationNotificationException(Throwable e) {
         super(e);
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + ": " + getMessage();
+    }
 }

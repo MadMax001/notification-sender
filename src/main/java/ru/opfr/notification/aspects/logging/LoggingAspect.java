@@ -17,7 +17,7 @@ import static ru.opfr.notification.aspects.logging.LogType.*;
 public class LoggingAspect {
     private final LogService logService;
 
-    @Pointcut("@annotation(Log) && args(object)")
+    @Pointcut("@annotation(Log) && args(object, ..)")
     public void logPointcut(Object object) {}
 
     @AfterThrowing(pointcut = "logPointcut(object)", throwing = "ex")
@@ -55,8 +55,8 @@ public class LoggingAspect {
     }
 
     private boolean isAppropriateLogType(Log log, LogType type) {
-        return log.what().length == 0 ||
-                Stream.of(log.what()).anyMatch(element -> element == ALL || element == type);
+        return log.goals().length == 0 ||
+                Stream.of(log.goals()).anyMatch(element -> element == ALL || element == type);
     }
 
     @Before("logPointcut(object)")

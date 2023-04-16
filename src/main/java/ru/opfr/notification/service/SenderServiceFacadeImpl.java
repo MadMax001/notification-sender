@@ -14,6 +14,7 @@ import ru.opfr.notification.converters.RequestNotificationConverterImpl;
 
 import java.util.Map;
 
+import static ru.opfr.notification.aspects.logging.LogType.ERROR;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 
 @Service
@@ -25,7 +26,7 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
     protected final RequestNotificationConverterImpl requestNotificationTransformer;
 
     @Override
-    @Log(errors = {CreationNotificationException.class, RuntimeException.class})
+    @Log(goals = {ERROR}, errors = {CreationNotificationException.class, RuntimeException.class})
     @Transactional(propagation = Propagation.NEVER)
     public Response send(Request request) throws CreationNotificationException {
         Notification notification = saveNotificationByRequest(request);

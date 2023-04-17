@@ -18,9 +18,9 @@ import ru.opfr.notification.model.SMTPServerAnswer;
 import ru.opfr.notification.service.*;
 
 import javax.mail.MessagingException;
+import javax.persistence.PersistenceException;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
@@ -63,6 +63,32 @@ class LoggingErrorInEmailSenderServiceAspectTest {
         assertTrue(message.contains("user@server.ru"));
         assertTrue(message.contains("Theme"));
         assertTrue(message.contains("content in message!"));
+    }
+
+    @Test
+    void throwsSendNotificationException_InAfterSending_AndLogThisError() throws MessagingException {
+        Throwable throwable = new PersistenceException("Error in after sending process");
+        Throwable wrapperThrowable = new SendNotificationException(throwable.toString());
+
+        SMTPServerAnswer aSMTPServerAnswer = new SMTPServerAnswer(200, "All right");
+        when(mailSender.send(any(), any())).thenReturn(aSMTPServerAnswer);
+
+        doThrow(throwable).when(notificationService).deleteAllAttachments(any(Notification.class));
+        Notification notification = getNotificationByType(EMAIL);
+
+        senderServiceSafeWrapper.safeSend(notification);
+
+        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+        String message = messageArgumentCaptor.getValue();
+        Throwable error = throwableArgumentCaptor.getValue();
+        assertTrue(error instanceof SendNotificationException);
+        assertEquals(wrapperThrowable.getMessage(), error.getMessage());
+        assertTrue(message.contains("afterSending"), "Name of method is \"send\"");
+        assertTrue(message.contains("EmailSenderService"), "Name of class is \"EmailSenderService\"");
+        assertTrue(message.contains("user@server.ru"));
+        assertTrue(message.contains("Theme"));
+        assertTrue(message.contains("content in message!"));
+        assertTrue(message.contains("true"));
     }
 
     @Test

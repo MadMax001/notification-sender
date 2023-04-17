@@ -7,6 +7,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 import ru.opfr.notification.aspects.logging.service.LogService;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ru.opfr.notification.aspects.logging.LogType.*;
@@ -21,14 +23,14 @@ public class LoggingAspect {
     public void logPointcut(Object object) {}
 
     @AfterThrowing(pointcut = "logPointcut(object)", throwing = "ex")
-    public void LogError(JoinPoint joinPoint, Throwable ex, Object object) {
+    public void logError(JoinPoint joinPoint, Throwable ex, Object object) {
         Log logError = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Log.class);
         if (isAppropriateException(logError, ex)) {
             String message = joinPoint.getSignature().getDeclaringType().getSimpleName() +
                     "." +
                     joinPoint.getSignature().getName() +
                     ": " +
-                    object.toString();
+                    Arrays.stream(joinPoint.getArgs()).map(Object::toString).collect(Collectors.joining(", "));
             logService.error(message, ex);
         }
     }
@@ -63,7 +65,9 @@ public class LoggingAspect {
     public void logInfoBefore(JoinPoint joinPoint, Object object) {
         Log logInfo = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Log.class);
         if (isLogBeforeInvoking(logInfo)) {
-            logService.info(object.toString(), INPUT);
+            logService.info(
+                    Arrays.stream(joinPoint.getArgs()).map(Object::toString).collect(Collectors.joining(", ")),
+                    INPUT);
         }
     }
 
@@ -72,7 +76,9 @@ public class LoggingAspect {
     public void logInfoAfter(JoinPoint joinPoint, Object object, Object result) {
         Log logInfo = ((MethodSignature) joinPoint.getSignature()).getMethod().getAnnotation(Log.class);
         if (isLogAfterInvoking(logInfo)) {
-            logService.info(result.toString(), OUTPUT);
+            logService.info(
+                    result.toString(),
+                    OUTPUT);
         }
     }
 

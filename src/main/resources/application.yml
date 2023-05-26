@@ -16,6 +16,7 @@ spring:
 #            hibernate:
 #                format_sql: true
     liquibase:
+        enabled: true
         change-log: classpath:db/changelog/changelog.sql
     servlet:
         multipart:
@@ -34,3 +35,8 @@ spring:
 app:
     mail:
         from: 0815@073.pfr.gov.ru
+    security:
+        key: bc26ceda53f96c1ef58ce64b927ca3d58df8031fec526af8ce23a81d7ce961ad
+        credentials: KwT6h7tntpi3YBwIh2NPvOHnVvoEO369FcKo7nA2yglyyydn0encrTHYQqsLIOBA
+    message:
+        showing_time: 36000

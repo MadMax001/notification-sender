@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class NotificationSenderServiceApplicationTests {
 	private final ApplicationContext context;
+
 	@Test
 	void contextLoads() {
 		assertNotNull(context.getBean(NotificationAttachmentRepository.class));

@@ -1,13 +1,13 @@
 package ru.opfr.notification;
 
 public class ApplicationConstants {
-    public static final String NULL_REQUEST = "null-request";
-    public static final String NULL_TYPE = "null-type";
-    public static final String NO_STAGES = "no stages";
-    public static final String NULL_CONTENT = "null-content";
-    public static final String NULL_USER = "User can't be null with MESSAGE type";                                  //todo Null-user for MESSAGE type
-    public static final String NULL_IP = "IP can't be null with MESSAGE type";                                      //todo
-    public static final String NULL_EMAIL = "Email can't be null with EMAIL or FILE types";                         //todo
+    public static final String NULL_REQUEST = "Null-request";
+    public static final String NULL_TYPE = "Null-type";
+    public static final String NO_STAGES = "No stages";
+    public static final String NULL_CONTENT = "Null-content";
+    public static final String NULL_USER = "Null-user for MESSAGE type";
+    public static final String NULL_IP = "Null-ip for MESSAGE type";
+    public static final String NULL_EMAIL = "Null-email for EMAIL type";
     public static final String MAX_LENGTH_USER = "User has more than 255 characters";
     public static final String WRONG_IP = "Wrong ip address";
     public static final String MAX_LENGTH_EMAIL = "Email has more than 255 characters";

@@ -33,6 +33,9 @@ public class WinCredentialsManagerStoreChecker {
                 throw new ApplicationRuntimeException("Unsuccessful execute of 'cmdkey /list' command: "
                         + getAllResponseOutInLine(response));
             credentialExists = checkLog(response);
+            if (!credentialExists) {
+                throw new ApplicationRuntimeException("There are no saved credentials for admin");
+            }
         } catch (InterruptedException | IOException | ExecutionException e) {
             throw new ApplicationRuntimeException(e);
         }

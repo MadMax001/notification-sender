@@ -18,15 +18,16 @@ public class AsyncWinMessageServiceImpl implements AsyncWinMessageService {
     private final WinConsoleCommandService commandService;
     private final WinCredentialsManagerStoreChecker checker;
     private final boolean isWindows;
-    @Value("${app.message.showing_time:36000")
-    private String showingTime;
+    private final String showingTime;
 
     public AsyncWinMessageServiceImpl(CredentialsService credentialsService,
                                       WinConsoleCommandService commandService,
-                                      WinCredentialsManagerStoreChecker checker) {
+                                      WinCredentialsManagerStoreChecker checker,
+                                      @Value("${app.message.showing_time}") String showingTime) {
         this.credentialsService = credentialsService;
         this.commandService = commandService;
         this.checker = checker;
+        this.showingTime = showingTime;
         isWindows = System.getProperty("os.name").toLowerCase().contains("windows");
     }
 
@@ -35,27 +36,46 @@ public class AsyncWinMessageServiceImpl implements AsyncWinMessageService {
         if (!isWindows) {
             throw new ApplicationRuntimeException("The sending message process is implements on windows platform only!");
         }
-        ProcessBuilder builder = getProcessBuilder(notification);
-        if (checker.isCredentialExists())
-            return commandService.executeCommand(builder);
-        else
-            return commandService.executeCommand(builder, credentialsService.getPassword());
+        ProcessBuilder builder;
+        if (checker.isCredentialExists()) {
+            builder = getProcessBuilder(notification);
+        } else {
+            builder = getProcessBuilderWithPassword(notification);
+        }
+        return commandService.executeCommand(builder);
     }
 
     private ProcessBuilder getProcessBuilder(Notification notification) {
         ProcessBuilder builder = new ProcessBuilder();
         builder.command(
-                "C:\\Windows\\System32\\runas.exe",
-                "/env",
-                "/profile",
-                "/savecred",
-                "/user:" + credentialsService.getUsername(),
-                "\"msg",
-                notification.getPerson().getUser(),
-                "/SERVER:" + notification.getPerson().getIp(),
-                "/TIME:" + showingTime,
-                notification.getContent(),
-                "\"");
+                "cmd.exe",
+                "/C",
+                getRunsAsMessageCommand(notification));
         return builder;
+    }
+
+    private ProcessBuilder getProcessBuilderWithPassword(Notification notification) {
+        ProcessBuilder builder = new ProcessBuilder();
+        builder.command(
+                "cmd.exe",
+                "/C",
+                "echo " + credentialsService.getPassword() + "|" + getRunsAsMessageCommand(notification));
+        return builder;
+    }
+
+    private String getRunsAsMessageCommand(Notification notification) {
+        return new StringBuilder()
+                .append("C:\\Windows\\System32\\runas.exe")
+                .append(" /env")
+                .append(" /profile")
+                .append(" /savecred")
+                .append(" /user:").append(credentialsService.getUsername())
+                .append(" \"msg")
+                .append(" ").append(notification.getPerson().getUser())
+                .append(" /SERVER:").append(notification.getPerson().getIp())
+                .append(" /TIME:").append(showingTime)
+                .append(" ").append(notification.getContent())
+                .append("\"")
+                .toString();
     }
 }

@@ -50,7 +50,7 @@ public class WinConsoleCommandServiceImpl implements WinConsoleCommandService {
                 }
             });
 
-            boolean result = process.waitFor(2, TimeUnit.SECONDS);
+            boolean result = process.waitFor(5, TimeUnit.SECONDS);
             if (result)
                 exitCode = process.exitValue();
             process.destroyForcibly();

@@ -26,7 +26,7 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.MESSAGE;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(initializers = ConfigDataApplicationContextInitializer.class)
-@EnableConfigurationProperties(value = AppSecurityPropertiesContextConfiguration.class)
+@EnableConfigurationProperties(value = {AppSecurityPropertiesContextConfiguration.class})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class AsyncWinMessageServiceImplTest {
     final AppSecurityPropertiesContextConfiguration securityProperties;
@@ -45,7 +45,6 @@ class AsyncWinMessageServiceImplTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        when(checker.isCredentialExists()).thenReturn(false);
         PropertiesFileSecurityService securityService = new PropertiesFileSecurityService(
                 securityProperties.getKey(), securityProperties.getCredentials());
         EncryptionService encryptionService = new AESEncryptionService(securityService);
@@ -58,13 +57,15 @@ class AsyncWinMessageServiceImplTest {
     @Test
     void checkForRunningOnAnotherOS_AndThrowException() {
         System.setProperty("os.name", "MacOS");
-        messageService = new AsyncWinMessageServiceImpl(credentialsService, commandService, checker);
+        messageService = new AsyncWinMessageServiceImpl(credentialsService, commandService, checker, "1");
         Notification notification = new Notification();
         assertThrows(ApplicationRuntimeException.class, () -> messageService.send(notification));
     }
 
     @Test
-    void sendCorrectMessage() throws IOException, InterruptedException, ExecutionException {
+    void sendCorrectMessage_WhenCredentialsIsAlreadySaved() throws IOException, InterruptedException, ExecutionException {
+        when(checker.isCredentialExists()).thenReturn(true);
+
         Notification notification = new Notification();
         notification.setRemoteId("remote-id");
         notification.setContent("Тест");
@@ -76,12 +77,36 @@ class AsyncWinMessageServiceImplTest {
         person.setEmail("user@server.ru");
         notification.setPerson(person);
 
-        messageService = new AsyncWinMessageServiceImpl(credentialsService, commandService, checker);
+        messageService = new AsyncWinMessageServiceImpl(credentialsService, commandService, checker, "1");
         WinConsoleExecuteResponse response = messageService.send(notification).get();
         assertEquals(0, response.getExitCode());
-        assertEquals(0, response.getConsoleStdOut().size());
-        assertEquals(0, response.getConsoleErrOut().size());
+        assertEquals(0, response.getConsoleStdOut().size(), String.join(" ", response.getConsoleStdOut()));
+        assertEquals(0, response.getConsoleErrOut().size(), String.join(" ", response.getConsoleErrOut()));
 
     }
+
+    @Test
+    void sendCorrectMessage_WhenCredentialsDoesNotSavedYet() throws IOException, InterruptedException, ExecutionException {
+        when(checker.isCredentialExists()).thenReturn(false);
+
+        Notification notification = new Notification();
+        notification.setRemoteId("remote-id");
+        notification.setContent("Тест");
+        notification.setType(MESSAGE);
+
+        Person person = new Person();
+        person.setUser("073BodrovMB");
+        person.setIp("10.73.3.11");
+        person.setEmail("user@server.ru");
+        notification.setPerson(person);
+
+        messageService = new AsyncWinMessageServiceImpl(credentialsService, commandService, checker, "1");
+        WinConsoleExecuteResponse response = messageService.send(notification).get();
+        assertEquals(0, response.getExitCode());
+        assertEquals(0, response.getConsoleStdOut().size(), String.join(" ", response.getConsoleStdOut()));
+        assertEquals(0, response.getConsoleErrOut().size(), String.join(" ", response.getConsoleErrOut()));
+
+    }
+
 
 }

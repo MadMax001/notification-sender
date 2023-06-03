@@ -9,13 +9,17 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.*;
+import ru.opfr.notification.model.builders.NotificationTestBuilder;
 import ru.opfr.notification.reporitory.NotificationRepository;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static ru.opfr.notification.model.NotificationProcessStageDictionary.FAILED;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.RECEIVED;
 import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
@@ -211,4 +215,38 @@ class NotificationServiceImplTest {
         assertEquals(stageId, notification.getStages().get(0).getId());
         assertEquals(message, notification.getStages().get(0).getMessage());
     }
+
+    @Test
+    void getIncompleteNotifications() {
+        when(notificationRepository.findAllByLatestStage(FAILED)).thenReturn(Arrays.asList(
+                NotificationTestBuilder.aNotification()
+                        .withTheme("N1")
+                        .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED})
+                        .build(),
+                NotificationTestBuilder.aNotification()
+                        .withTheme("N2")
+                        .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED})
+                        .build()
+
+        ));
+        when(notificationRepository.findAllByLatestStageAndCreatedBeforeAndUpdatedIsNull(eq(RECEIVED), any(LocalDateTime.class))).thenReturn(Arrays.asList(
+                NotificationTestBuilder.aNotification()
+                        .withTheme("N3")
+                        .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                        .build(),
+                NotificationTestBuilder.aNotification()
+                        .withTheme("N4")
+                        .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                        .build(),
+                NotificationTestBuilder.aNotification()
+                        .withTheme("N5")
+                        .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                        .build()
+        ));
+
+        List<Notification> incompleteNotifications = notificationService.getIncompleteNotifications();
+        assertEquals(5, incompleteNotifications.size());
+    }
+
+
 }

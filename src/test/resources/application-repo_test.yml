@@ -31,6 +31,8 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+      springframework:
+        security: TRACE
   file:
     path: logs/test
     max-size: 10Mb

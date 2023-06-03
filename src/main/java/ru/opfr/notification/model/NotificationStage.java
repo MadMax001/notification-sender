@@ -1,5 +1,6 @@
 package ru.opfr.notification.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,7 @@ public class NotificationStage {
     @SequenceGenerator(name="stage_sequence", sequenceName = "notification.stage_sequence", allocationSize = 1)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne(fetch = LAZY)
     //@Cascade(SAVE_UPDATE)
     @JoinColumn(name = "notification_id")

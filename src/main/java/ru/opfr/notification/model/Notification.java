@@ -1,8 +1,10 @@
 package ru.opfr.notification.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JoinFormula;
 import ru.opfr.notification.constraint.NotEmptyCollection;
 import ru.opfr.notification.constraint.NotNullByType;
 
@@ -45,6 +47,11 @@ public class Notification {
     @OneToMany(fetch = LAZY, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationStage> stages = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinFormula(value = "(SELECT stage.id FROM notification.notification_stage stage " +
+            "WHERE stage.notification_id = id ORDER BY stage.id DESC LIMIT 1)", referencedColumnName = "id")
+    private NotificationStage latest;
+
     private LocalDateTime updated;
 
     private LocalDateTime created;
@@ -62,6 +69,7 @@ public class Notification {
     @Size(max=255, message = MAX_LENGTH_THEME)
     private String theme;
 
+    @JsonIgnore
     @OneToMany(fetch = LAZY, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
     @Size(max=5, message = MAX_COUNT_ATTACHMENTS)
     @NotNull(message = NULL_ATTACHMENTS)

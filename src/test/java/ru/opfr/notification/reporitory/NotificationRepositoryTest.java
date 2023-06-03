@@ -1,17 +1,22 @@
 package ru.opfr.notification.reporitory;
 
+
 import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
-import ru.opfr.notification.model.Notification;
-import ru.opfr.notification.model.NotificationAttachment;
-import ru.opfr.notification.model.NotificationStage;
-import ru.opfr.notification.model.Person;
+import ru.opfr.notification.model.*;
+import ru.opfr.notification.model.builders.NotificationTestBuilder;
 
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.*;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.*;
@@ -47,6 +52,7 @@ class NotificationRepositoryTest {
         notification.setRemoteId("test-remote-id");
         notificationRepository.save(notification);
         entityManager.flush();
+        entityManager.clear();
 
         assertNotNull(notification.getId());
         Notification dbNotification = notificationRepository.findById(notification.getId()).orElse(null);
@@ -94,6 +100,7 @@ class NotificationRepositoryTest {
         notification.addStage(stage);
         notificationRepository.save(notification);
         entityManager.flush();
+        entityManager.clear();
         assertNull(notificationRepository.findById(Long.MAX_VALUE).orElse(null));
 
     }
@@ -117,6 +124,7 @@ class NotificationRepositoryTest {
         notificationRepository.save(notification1);
         Long id = notification1.getId();
         entityManager.flush();
+        entityManager.clear();
 
         Notification dbNotification = notificationRepository.findById(id).orElse(null);
         assertNotNull(dbNotification);
@@ -132,6 +140,7 @@ class NotificationRepositoryTest {
         dbNotification.setRemoteId("test-remote2-id");
         notificationRepository.save(dbNotification);
         entityManager.flush();
+        entityManager.clear();
 
         Notification dbUpdatedNotification = notificationRepository.findById(id).orElse(null);
 
@@ -173,12 +182,14 @@ class NotificationRepositoryTest {
         notificationRepository.save(notification1);
         Long id = notification1.getId();
         entityManager.flush();
+        entityManager.clear();
 
         Notification dbNotification = notificationRepository.findById(id).orElse(null);
         assertNotNull(dbNotification);
         dbNotification.addStage(stage2);
-        notificationRepository.save(notification1);
+        notificationRepository.save(dbNotification);
         entityManager.flush();
+        entityManager.clear();
 
         Notification dbUpdatedNotification = notificationRepository.findById(id).orElse(null);
         assertNotNull(dbUpdatedNotification);
@@ -220,6 +231,7 @@ class NotificationRepositoryTest {
         notification1.addStage(stage2);
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
 
         Long notificationId = notification1.getId();
         Long stage1Id = stage1.getId();
@@ -227,6 +239,7 @@ class NotificationRepositoryTest {
 
         notificationRepository.deleteById(notificationId);
         entityManager.flush();
+        entityManager.clear();
 
         Notification dbNotification = notificationRepository.findById(notificationId).orElse(null);
         NotificationStage dbStage1 = notificationStageRepository.findById(stage1Id).orElse(null);
@@ -266,6 +279,8 @@ class NotificationRepositoryTest {
 
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
+
         Long notificationId = notification1.getId();
         assertNotNull(attachment1.getId());
         assertNotNull(attachment2.getId());
@@ -317,6 +332,7 @@ class NotificationRepositoryTest {
 
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
 
         NotificationAttachment dbAttachment1 = notificationAttachmentRepository.findById(attachment1.getId()).orElse(null);
         NotificationAttachment dbAttachment2 = notificationAttachmentRepository.findById(attachment2.getId()).orElse(null);
@@ -359,6 +375,8 @@ class NotificationRepositoryTest {
 
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
+
         Long attachment1Id = attachment1.getId();
         Long attachment2Id = attachment2.getId();
 
@@ -396,10 +414,12 @@ class NotificationRepositoryTest {
 
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
 
         notification1.clearAttachments();
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
 
         Notification dbNotification = notificationRepository.findById(notification1.getId()).orElse(null);
         assertNotNull(dbNotification);
@@ -435,6 +455,7 @@ class NotificationRepositoryTest {
 
         notificationRepository.save(notification1);
         entityManager.flush();
+        entityManager.clear();
 
         Long notificationId = notification1.getId();
         Long attachment1Id = attachment1.getId();
@@ -450,6 +471,7 @@ class NotificationRepositoryTest {
 
         notificationRepository.deleteById(notificationId);
         entityManager.flush();
+        entityManager.clear();
 
         NotificationAttachment dbAttachment1AfterDelete = notificationAttachmentRepository.findById(attachment1Id).orElse(null);
         assertNull(dbAttachment1AfterDelete);
@@ -457,4 +479,177 @@ class NotificationRepositoryTest {
         assertNull(dbAttachment2AfterDelete);
 
     }
+
+    @Test
+    void persistNotificationWithManyStages_AndCheckLastStageField() {
+        Notification notification = NotificationTestBuilder.aNotification()
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED, PROCESSED})
+                .build();
+        assertNull(notification.getLatest());
+        notificationRepository.save(notification);
+        entityManager.flush();
+        entityManager.clear();
+
+        Notification dbNotification = notificationRepository.findById(notification.getId()).orElse(null);
+        assertNotNull(dbNotification);
+        assertNotNull(dbNotification.getLatest());
+        assertEquals(PROCESSED, dbNotification.getLatest().getStage());
+    }
+
+    @Test
+    void persistNotificationWithStage_ReadNotification_AddStage_AndCheckLastStageField() {
+        Notification notification = NotificationTestBuilder.aNotification().build();
+        NotificationStage stage = new NotificationStage();
+        stage.setStage(RECEIVED);
+        stage.setMessage("stage1");
+        notification.addStage(stage);
+        notificationRepository.save(notification);
+        entityManager.flush();
+        entityManager.clear();
+
+        Notification dbNotification = notificationRepository.findById(notification.getId()).orElse(null);
+        assertNotNull(dbNotification);
+        assertNotNull(dbNotification.getLatest());
+        NotificationStage stage1 = new NotificationStage();
+        stage1.setStage(PROCESSED);
+        stage1.setMessage("stage2");
+        dbNotification.addStage(stage1);
+        notificationRepository.save(dbNotification);
+        entityManager.flush();
+        entityManager.clear();
+
+        Notification dbNotification2 = notificationRepository.findById(notification.getId()).orElse(null);
+        assertNotNull(dbNotification2);
+        assertEquals(PROCESSED, dbNotification2.getLatest().getStage());
+    }
+
+    @Test
+    void findAllNotificationsWithLastStages() {
+        Notification successfulNotification1 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification1")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, PROCESSED})
+                .build();
+        Notification unsuccessfulNotification2 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification2")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED})
+                .build();
+        Notification successfulNotification3 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification3")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED, PROCESSED})
+                .build();
+        Notification successfulNotification4 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification4")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED, FAILED, FAILED, PROCESSED})
+                .build();
+
+        Notification incompleteNotification5 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification5")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+
+        Notification incompleteNotification6 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification6")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+
+        notificationRepository.save(successfulNotification1);
+        notificationRepository.save(unsuccessfulNotification2);
+        notificationRepository.save(successfulNotification3);
+        notificationRepository.save(successfulNotification4);
+        notificationRepository.save(incompleteNotification5);
+        notificationRepository.save(incompleteNotification6);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Notification> allNotificationsList = notificationRepository.findAll();
+        assertEquals(6, allNotificationsList.size());
+        List<NotificationStage> stagesList = allNotificationsList.stream()
+                .flatMap(n -> n.getStages().stream()).collect(Collectors.toList());
+        assertEquals(14, stagesList.size());
+
+        List<Notification> processedNotificationList = notificationRepository.findAllByLatestStage(PROCESSED);
+        assertEquals(3, processedNotificationList.size());
+
+        List<Notification> failedNotificationList = notificationRepository.findAllByLatestStage(FAILED);
+        assertEquals(1, failedNotificationList.size());
+
+        List<Notification> incompleteNotificationList = notificationRepository.findAllByLatestStage(RECEIVED);
+        assertEquals(2, incompleteNotificationList.size());
+    }
+
+    @Test
+    void tryToFindIncompleteNotifications() {
+        Notification successfulNotification1 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification1")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, PROCESSED})
+                .build();
+        Notification unsuccessfulNotification2 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification2")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED})
+                .build();
+        notificationRepository.save(successfulNotification1);
+        notificationRepository.save(unsuccessfulNotification2);
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Notification> incompleteNotificationList = notificationRepository.findAllByLatestStage(RECEIVED);
+        assertEquals(0, incompleteNotificationList.size());
+    }
+
+    @Test
+    void findIncompleteNotifications_ThatWereUpdatedMoreThan2SecondsBefore() throws InterruptedException {
+        Notification oldIncompleteNotification1 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification1")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Notification oldIncompleteNotification2 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification2")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Notification oldCompleteNotification = NotificationTestBuilder.aNotification()
+                .withTheme("Notification3")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, PROCESSED})
+                .build();
+        Notification oldFailedNotification = NotificationTestBuilder.aNotification()
+                .withTheme("Notification4")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED})
+                .build();
+        notificationRepository.save(oldIncompleteNotification1);
+        notificationRepository.save(oldIncompleteNotification2);
+        notificationRepository.save(oldCompleteNotification);
+        notificationRepository.save(oldFailedNotification);
+        entityManager.flush();
+        entityManager.clear();
+        TimeUnit.SECONDS.sleep(4);
+
+        Notification incompleteNotification1 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification5")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Notification incompleteNotification2 = NotificationTestBuilder.aNotification()
+                .withTheme("Notification6")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Notification completeNotification = NotificationTestBuilder.aNotification()
+                .withTheme("Notification7")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, PROCESSED})
+                .build();
+        Notification failedNotification = NotificationTestBuilder.aNotification()
+                .withTheme("Notification8")
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED, FAILED})
+                .build();
+        notificationRepository.save(incompleteNotification1);
+        notificationRepository.save(incompleteNotification2);
+        notificationRepository.save(completeNotification);
+        notificationRepository.save(failedNotification);
+        entityManager.flush();
+        entityManager.clear();
+
+        List<Notification> oldIncompleteNotificationsList = notificationRepository
+                .findAllByLatestStageAndCreatedBeforeAndUpdatedIsNull(RECEIVED, LocalDateTime.now().minus(2, SECONDS));
+        assertEquals(2, oldIncompleteNotificationsList.size());
+
+    }
+
 }

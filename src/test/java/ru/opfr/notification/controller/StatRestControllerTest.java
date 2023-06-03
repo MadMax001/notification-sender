@@ -116,10 +116,10 @@ class StatRestControllerTest {
         );
         mockMvc.perform(MockMvcRequestBuilders
                         .get("/statistics/incomplete"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
-    @WithMockUser(value = "saaa", password = "bbbb", roles = "USER")
+    @WithMockUser(value = "stat_user", password = "bbbb", roles = "USER")
     @Test
     void statisticsPageWithIncorrectAuthentication_AndGetUnauthorizedStatus() throws Exception {
         when(notificationService.getIncompleteNotifications()).thenReturn(
@@ -136,7 +136,7 @@ class StatRestControllerTest {
         );
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/statistics/incomplete"))
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isForbidden());
     }
 
 }

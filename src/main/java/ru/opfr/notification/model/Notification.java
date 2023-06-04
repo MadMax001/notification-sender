@@ -107,7 +107,15 @@ public class Notification {
         if (this == o) return true;
         if (!(o instanceof Notification)) return false;
         Notification that = (Notification) o;
-        return Objects.equals(id, that.id) && Objects.equals(remoteId, that.remoteId) && type == that.type && Objects.equals(stages, that.stages) && Objects.equals(updated, that.updated) && Objects.equals(created, that.created) && Objects.equals(person, that.person) && Objects.equals(content, that.content) && Objects.equals(theme, that.theme);
+        return Objects.equals(id, that.id) &&
+                Objects.equals(remoteId, that.remoteId) &&
+                type == that.type &&
+                Objects.equals(stages, that.stages) &&
+                Objects.equals(updated, that.updated) &&
+                Objects.equals(created, that.created) &&
+                Objects.equals(person, that.person) &&
+                Objects.equals(content, that.content) &&
+                Objects.equals(theme, that.theme);
     }
 
     @Override

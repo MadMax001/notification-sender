@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.Incubating;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -12,27 +13,34 @@ import ru.opfr.notification.aspects.logging.service.LogService;
 import ru.opfr.notification.exception.ApplicationRuntimeException;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.*;
+import ru.opfr.notification.model.builders.NotificationTestBuilder;
 import ru.opfr.notification.model.dto.Request;
+import ru.opfr.notification.service.BackgroundTaskService;
 import ru.opfr.notification.service.NotificationService;
 import ru.opfr.notification.service.SMTPMailSender;
 import ru.opfr.notification.service.SenderServiceFacadeSafeWrapper;
 
 import javax.mail.MessagingException;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static ru.opfr.notification.model.NotificationProcessStageDictionary.RECEIVED;
 import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 import static ru.opfr.notification.model.NotificationTypeDictionary.MESSAGE;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ActiveProfiles({"repo_test"})
+@ActiveProfiles({"tasks_test", "repo_test"})
 class LoggingErrorInSenderServiceFacadeAspectTest {
     @MockBean
     private final NotificationService notificationService;
 
     private final SenderServiceFacadeSafeWrapper senderServiceFacadeSafeWrapper;
+    @Incubating
+    private final BackgroundTaskService taskService;
 
     @MockBean
     private final SMTPMailSender mailSender;
@@ -162,7 +170,7 @@ class LoggingErrorInSenderServiceFacadeAspectTest {
     }
 
     @Test
-    void withoutErrors_AndLoggingDoesNotInvoking() throws CreationNotificationException, MessagingException {
+    void withoutErrors_InSendMethod_AndLoggingDoesNotInvoking() throws CreationNotificationException, MessagingException {
 
         when(notificationService.addStageWithMessageAndSave(any(), any(), any(Notification.class))).thenAnswer(invocation -> {
             Notification notification = invocation.getArgument(2);
@@ -175,6 +183,88 @@ class LoggingErrorInSenderServiceFacadeAspectTest {
 
         verify(logService, never()).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
     }
+
+    @Test
+    void throwsCreationNotificationException_InResendSendProcess_AndLogThisError() throws CreationNotificationException, MessagingException {
+        Throwable throwable = new CreationNotificationException("Error message");
+        when(notificationService.addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), any(), any(Notification.class)))
+                .thenThrow(throwable);
+
+        Notification notification = NotificationTestBuilder.aNotification()
+                .withType(EMAIL)
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                        .build();
+        when(notificationService.getIncompleteNotifications()).thenReturn(
+                Collections.singletonList(notification)
+        );
+        when(mailSender.send(any(), any())).thenReturn(new SMTPServerAnswer(200, "OK"));
+
+        assertThrows(CreationNotificationException.class, taskService::resendIncompleteNotifications);
+
+        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+        String message = messageArgumentCaptor.getValue();
+        Throwable error = throwableArgumentCaptor.getValue();
+        assertTrue(error instanceof CreationNotificationException);
+        assertEquals("Error message", error.getMessage());
+        assertTrue(message.contains("resend"), "Name of method is \"resend\"");
+        assertTrue(message.contains("SenderServiceFacadeImpl"), "Name of class is \"SenderServiceFacadeImpl\"");
+        assertTrue(message.contains(notification.getPerson().getEmail()));
+        assertTrue(message.contains(notification.getTheme()));
+        assertTrue(message.contains(notification.getContent()));
+
+    }
+
+    @Test
+    void throwsSubRuntimeException_InResendSendProcess_AndLogThisError() throws CreationNotificationException, MessagingException {
+        Throwable throwable = new ApplicationRuntimeException(new Exception("Error message"));
+        when(notificationService.addStageWithMessageAndSave(any(NotificationProcessStageDictionary.class), any(), any(Notification.class)))
+                .then(invocationOnMock -> invocationOnMock.getArgument(2));
+
+        Notification notification = NotificationTestBuilder.aNotification()
+                .withType(EMAIL)
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        when(notificationService.getIncompleteNotifications()).thenReturn(
+                Collections.singletonList(notification)
+        );
+        doThrow(throwable).when(mailSender).send(any(), any());
+
+        assertThrows(ApplicationRuntimeException.class, taskService::resendIncompleteNotifications);
+
+        verify(logService).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+        String message = messageArgumentCaptor.getValue();
+        Throwable error = throwableArgumentCaptor.getValue();
+        assertTrue(error instanceof ApplicationRuntimeException);
+        assertTrue(error.getMessage().contains("Error message"));
+        assertTrue(error.getMessage().contains("java.lang.Exception"));
+        assertTrue(message.contains("resend"), "Name of method is \"resend\"");
+        assertTrue(message.contains("SenderServiceFacadeImpl"), "Name of class is \"SenderServiceFacadeImpl\"");
+        assertTrue(message.contains(notification.getPerson().getEmail()));
+        assertTrue(message.contains(notification.getTheme()));
+        assertTrue(message.contains(notification.getContent()));
+
+    }
+
+    @Test
+    void withoutErrors_InResendMethod_AndLoggingDoesNotInvoking() throws CreationNotificationException, MessagingException {
+
+        when(notificationService.addStageWithMessageAndSave(any(), any(), any(Notification.class))).thenAnswer(invocation -> {
+            Notification notification = invocation.getArgument(2);
+            return notification;
+        });
+        when(mailSender.send(any(), any())).thenReturn(new SMTPServerAnswer(200, "All right"));
+        Notification notification = NotificationTestBuilder.aNotification()
+                .withType(EMAIL)
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        when(notificationService.getIncompleteNotifications()).thenReturn(
+                Collections.singletonList(notification));
+
+        taskService.resendIncompleteNotifications();
+
+        verify(logService, never()).error(messageArgumentCaptor.capture(), throwableArgumentCaptor.capture());
+    }
+
 
     private Request getRequestByType(NotificationTypeDictionary type) {
         Request request = new Request();

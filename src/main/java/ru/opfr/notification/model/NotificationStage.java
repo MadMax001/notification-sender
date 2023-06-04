@@ -50,7 +50,9 @@ public class NotificationStage {
         if (this == o) return true;
         if (!(o instanceof NotificationStage)) return false;
         NotificationStage that = (NotificationStage) o;
-        return notification.equals(that.notification) && stage == that.stage && Objects.equals(message, that.message) && Objects.equals(created, that.created);
+        return stage == that.stage &&
+                Objects.equals(message, that.message) &&
+                Objects.equals(created, that.created);
     }
 
     @Override

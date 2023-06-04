@@ -11,6 +11,7 @@ import ru.opfr.notification.converters.RequestNotificationConverterImpl;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.*;
+import ru.opfr.notification.model.builders.NotificationTestBuilder;
 import ru.opfr.notification.model.dto.Request;
 import ru.opfr.notification.model.dto.Response;
 import java.util.*;
@@ -125,7 +126,7 @@ class SenderServiceFacadeImplTest {
     }
 
     @Test
-    void sendWithUnsuccessfulSendOperation_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException, SendNotificationException {
+    void sendWithUnsuccessfulSendOperation_AndGetUnsuccessfulResponse_AndCheckTwoStagesInInnerNotificationObject() throws CreationNotificationException {
         NotificationTypeDictionary type = MESSAGE;
         Request request = getRequestByType(type);
 
@@ -188,6 +189,89 @@ class SenderServiceFacadeImplTest {
         verify(notificationService).addStageWithMessageAndSave(eq(PROCESSED), any(), any());
         verify(senderServiceSafeWrapper).safeSend(any());
         verify(sendersMap.get(MESSAGE)).getSendingResultMessage();
+    }
+
+
+    @Test
+    void resendWithSuccessfulSendOperation_AndCheckOneAddedStageInInnerNotificationObject() throws CreationNotificationException {
+        Notification incompleteNotification = NotificationTestBuilder.aNotification()
+                .withType(MESSAGE)
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Map<NotificationTypeDictionary, SenderService> sendersMap = new HashMap<>();
+        boolean sendOperation = true;
+        String resultMessage = PROCESSED_STAGE_MESSAGE;
+        SenderService service = createSenderService(MESSAGE, sendOperation, resultMessage);
+        sendersMap.put(service.getType(), spy(service));
+
+        when(senderServiceSafeWrapper.safeSend(any(Notification.class))).thenReturn(sendOperation);
+        when(notificationService.addStageWithMessageAndSave(any(), any(), any())).then((invocation) -> {
+            Notification notification = invocation.getArgument(2);
+            NotificationStage newStage = new NotificationStage();
+            newStage.setStage(invocation.getArgument(0));
+            newStage.setMessage(invocation.getArgument(1));
+            notification.addStage(newStage);
+
+            return notification;
+        });
+        facade = new SenderServiceFacadeImpl(notificationService, senderServiceSafeWrapper, sendersMap, requestNotificationConverter);
+        facade.resend(incompleteNotification);
+
+        assertEquals(2, incompleteNotification.getStages().size());
+        assertEquals(RECEIVED, incompleteNotification.getStages().get(0).getStage());
+        assertEquals(PROCESSED, incompleteNotification.getStages().get(1).getStage());
+        assertEquals(resultMessage, incompleteNotification.getStages().get(1).getMessage());
+    }
+
+    @Test
+    void resendWithUnsuccessfulSendOperation_AndCheckOneAddedStageInInnerNotificationObject() throws CreationNotificationException {
+        Notification incompleteNotification = NotificationTestBuilder.aNotification()
+                .withType(MESSAGE)
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Map<NotificationTypeDictionary, SenderService> sendersMap = new HashMap<>();
+        boolean sendOperation = false;
+        String resultMessage = FAILED_STAGE_MESSAGE;
+        SenderService service = createSenderService(MESSAGE, sendOperation, resultMessage);
+        sendersMap.put(service.getType(), spy(service));
+
+        when(senderServiceSafeWrapper.safeSend(any(Notification.class))).thenReturn(sendOperation);
+        when(notificationService.addStageWithMessageAndSave(any(), any(), any())).then((invocation) -> {
+            Notification notification = invocation.getArgument(2);
+            NotificationStage newStage = new NotificationStage();
+            newStage.setStage(invocation.getArgument(0));
+            newStage.setMessage(invocation.getArgument(1));
+            notification.addStage(newStage);
+
+            return notification;
+        });
+        facade = new SenderServiceFacadeImpl(notificationService, senderServiceSafeWrapper, sendersMap, requestNotificationConverter);
+        facade.resend(incompleteNotification);
+
+        assertEquals(2, incompleteNotification.getStages().size());
+        assertEquals(RECEIVED, incompleteNotification.getStages().get(0).getStage());
+        assertEquals(FAILED, incompleteNotification.getStages().get(1).getStage());
+        assertEquals(resultMessage, incompleteNotification.getStages().get(1).getMessage());
+    }
+
+    @Test
+    void resendNotification_AndThrowExceptionInAddStageMethod() throws CreationNotificationException {
+        Notification incompleteNotification = NotificationTestBuilder.aNotification()
+                .withType(MESSAGE)
+                .withStages(new NotificationProcessStageDictionary[]{RECEIVED})
+                .build();
+        Map<NotificationTypeDictionary, SenderService> sendersMap = new HashMap<>();
+        boolean sendOperation = true;
+        String resultMessage = PROCESSED_STAGE_MESSAGE;
+        SenderService service = createSenderService(MESSAGE, sendOperation, resultMessage);
+        sendersMap.put(service.getType(), spy(service));
+
+        when(senderServiceSafeWrapper.safeSend(any(Notification.class))).thenReturn(sendOperation);
+        Throwable exception = new CreationNotificationException("Error");
+
+        doThrow(exception).when(notificationService).addStageWithMessageAndSave(any(), any(), any());
+        facade = new SenderServiceFacadeImpl(notificationService, senderServiceSafeWrapper, sendersMap, requestNotificationConverter);
+        assertThrows(CreationNotificationException.class, () -> facade.resend(incompleteNotification));
     }
 
     private Request getRequestByType(NotificationTypeDictionary type) {

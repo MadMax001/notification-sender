@@ -15,6 +15,7 @@ import ru.opfr.notification.converters.RequestNotificationConverterImpl;
 import java.util.Map;
 
 import static ru.opfr.notification.aspects.logging.LogType.ERROR;
+import static ru.opfr.notification.aspects.logging.LogType.INPUT;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.*;
 
 @Service
@@ -48,5 +49,12 @@ public class SenderServiceFacadeImpl implements SenderServiceFacade {
         return notificationService.addStageWithMessageAndSave(RECEIVED, null, notification);
     }
 
-
+    @Override
+    @Log(goals = {INPUT, ERROR}, errors = {CreationNotificationException.class, RuntimeException.class})
+    @Transactional(propagation = Propagation.NEVER)
+    public void resend(Notification notification) throws CreationNotificationException {
+        boolean success = senderServiceSafeWrapper.safeSend(notification);
+        SenderService service = sendersMap.get(notification.getType());
+        notificationService.addStageWithMessageAndSave(success ? PROCESSED: FAILED, service.getSendingResultMessage(), notification);
+    }
 }

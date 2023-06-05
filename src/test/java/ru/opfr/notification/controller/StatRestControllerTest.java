@@ -60,7 +60,7 @@ class StatRestControllerTest {
                         .build())
         );
         mockMvc.perform(MockMvcRequestBuilders
-                .post("/statistics/incomplete"))
+                .post("/api/v1/statistics/incomplete"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -81,7 +81,7 @@ class StatRestControllerTest {
 
         );
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/statistics/incomplete"))
+                        .post("/api/v1/statistics/incomplete"))
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
@@ -115,7 +115,7 @@ class StatRestControllerTest {
 
         );
         mockMvc.perform(MockMvcRequestBuilders
-                        .get("/statistics/incomplete"))
+                        .get("/api/v1/statistics/incomplete"))
                 .andExpect(status().isForbidden());
     }
 
@@ -135,7 +135,7 @@ class StatRestControllerTest {
 
         );
         mockMvc.perform(MockMvcRequestBuilders
-                        .post("/statistics/incomplete"))
+                        .post("/api/v1/statistics/incomplete"))
                 .andExpect(status().isForbidden());
     }
 

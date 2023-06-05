@@ -44,8 +44,8 @@ public class NotificationSenderSecurityConfiguration {
                     .sessionCreationPolicy(STATELESS)
                 .and()
                     .authorizeRequests()
-                        .antMatchers(GET, "/health").permitAll()
-                        .antMatchers(POST, "/statistics/**").hasRole("STAT")
+                        .antMatchers(GET, "/api/v1/health").permitAll()
+                        .antMatchers(POST, "/api/v1/statistics/**").hasRole("STAT")
                         .anyRequest().denyAll()
                 .and()
                     .httpBasic(withDefaults());

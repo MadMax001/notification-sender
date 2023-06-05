@@ -10,7 +10,7 @@ import ru.opfr.notification.service.NotificationService;
 import java.util.List;
 
 @RestController
-@RequestMapping("/statistics")
+@RequestMapping("/api/v1/statistics")
 @RequiredArgsConstructor
 public class StatRestController {
     private final NotificationService notificationService;

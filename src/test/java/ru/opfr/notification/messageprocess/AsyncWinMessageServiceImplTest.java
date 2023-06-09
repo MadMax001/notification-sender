@@ -16,6 +16,7 @@ import ru.opfr.notification.exception.ApplicationRuntimeException;
 import ru.opfr.notification.messageprocess.model.WinConsoleExecuteResponse;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.Person;
+import ru.opfr.test.RunIfIPStarts;
 
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
@@ -63,6 +64,7 @@ class AsyncWinMessageServiceImplTest {
     }
 
     @Test
+    @RunIfIPStarts("10.73.")
     void sendCorrectMessage_WhenCredentialsIsAlreadySaved() throws IOException, InterruptedException, ExecutionException {
         when(checker.isCredentialExists()).thenReturn(true);
 
@@ -86,6 +88,7 @@ class AsyncWinMessageServiceImplTest {
     }
 
     @Test
+    @RunIfIPStarts("10.73.")
     void sendCorrectMessage_WhenCredentialsDoesNotSavedYet() throws IOException, InterruptedException, ExecutionException {
         when(checker.isCredentialExists()).thenReturn(false);
 

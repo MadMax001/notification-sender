@@ -1,5 +1,6 @@
 package ru.opfr.notification;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,6 +21,11 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 public class NotificationSenderSecurityConfiguration {
+    private static final String API = "/api/";
+
+    @Value("${app.api.version}")
+    private String apiVersion;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(16);
@@ -44,8 +50,9 @@ public class NotificationSenderSecurityConfiguration {
                     .sessionCreationPolicy(STATELESS)
                 .and()
                     .authorizeRequests()
-                        .antMatchers(GET, "/api/v1/health").permitAll()
-                        .antMatchers(POST, "/api/v1/statistics/**").hasRole("STAT")
+                        .antMatchers(GET, API + apiVersion + "/health").permitAll()
+                        .antMatchers(API + apiVersion + "/notifications/**").permitAll()
+                        .antMatchers(POST, API + apiVersion + "/statistics/**").hasRole("STAT")
                         .anyRequest().denyAll()
                 .and()
                     .httpBasic(withDefaults());

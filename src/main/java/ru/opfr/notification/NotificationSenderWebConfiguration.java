@@ -17,4 +17,5 @@ public class NotificationSenderWebConfiguration implements WebMvcConfigurer {
                 .findFirst()
                 .ifPresent(converter -> ((MappingJackson2HttpMessageConverter) converter).setDefaultCharset(UTF_8));
     }
+
 }

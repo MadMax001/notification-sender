@@ -39,6 +39,8 @@ spring:
             pool:
                 size: 1
 app:
+    api:
+        version: v1
     mail:
         from: 0815@073.pfr.gov.ru
     security:

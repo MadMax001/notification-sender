@@ -26,16 +26,17 @@ import java.util.Collections;
 
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.FAILED;
 import static ru.opfr.notification.model.NotificationProcessStageDictionary.RECEIVED;
 import static org.hamcrest.Matchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={NotificationSenderSecurityConfiguration.class,  StatRestController.class})
+@ContextConfiguration(classes={NotificationSenderSecurityConfiguration.class, ExceptionHandlerController.class, StatRestControllerV1.class})
 @ActiveProfiles("repo_test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class StatRestControllerTest {
+class StatRestControllerV1Test {
     @MockBean
     private final NotificationService notificationService;
 
@@ -82,20 +83,23 @@ class StatRestControllerTest {
         );
         mockMvc.perform(MockMvcRequestBuilders
                         .post("/api/v1/statistics/incomplete"))
+                .andDo(print())
                 .andExpectAll(
                         status().isOk(),
                         content().contentType(MediaType.APPLICATION_JSON),
                         content().encoding(StandardCharsets.ISO_8859_1),
-                        jsonPath("$", hasSize(2)),
-                        jsonPath("$[0].theme", is("Тестовая тема1")),
-                        jsonPath("$[0].stages", hasSize(1)),
-                        jsonPath("$[0].stages[0].stage", is("RECEIVED")),
-                        jsonPath("$[0].attachments").doesNotExist(),
-                        jsonPath("$[1].theme", is("Тестовая тема2")),
-                        jsonPath("$[1].attachments").doesNotExist(),
-                        jsonPath("$[1].stages", hasSize(2)),
-                        jsonPath("$[1].stages[0].stage", is("RECEIVED")),
-                        jsonPath("$[1].stages[1].stage", is("FAILED"))
+                        jsonPath("$.timestamp", notNullValue()),
+                        jsonPath("$.version", is("v1")),
+                        jsonPath("$.response", hasSize(2)),
+                        jsonPath("$.response[0].theme", is("Тестовая тема1")),
+                        jsonPath("$.response[0].stages", hasSize(1)),
+                        jsonPath("$.response[0].stages[0].stage", is("RECEIVED")),
+                        jsonPath("$.response[0].attachments").doesNotExist(),
+                        jsonPath("$.response[1].theme", is("Тестовая тема2")),
+                        jsonPath("$.response[1].attachments").doesNotExist(),
+                        jsonPath("$.response[1].stages", hasSize(2)),
+                        jsonPath("$.response[1].stages[0].stage", is("RECEIVED")),
+                        jsonPath("$.response[1].stages[1].stage", is("FAILED"))
                         );
     }
 

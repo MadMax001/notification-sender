@@ -13,15 +13,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import ru.opfr.notification.NotificationSenderSecurityConfiguration;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest
-@ContextConfiguration(classes={NotificationSenderSecurityConfiguration.class, HealthRestController.class})
+@ContextConfiguration(classes={NotificationSenderSecurityConfiguration.class, HealthRestControllerV1.class})
 @ActiveProfiles("repo_test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class HealthRestControllerTest {
+class HealthRestControllerV1Test {
     private final WebApplicationContext context;
 
     MockMvc mockMvc;
@@ -38,7 +40,11 @@ class HealthRestControllerTest {
     @Test
     void checkHealth() throws Exception {
         mockMvc.perform(get("/api/v1/health"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("OK"));
+                .andExpectAll(
+                    status().isOk(),
+                    jsonPath("$.timestamp", notNullValue()),
+                    jsonPath("$.version", is("v1")),
+                    jsonPath("$.response", is("ok")));
+
     }
 }

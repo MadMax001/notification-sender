@@ -1,4 +1,4 @@
-package ru.opfr.e2e;
+package ru.opfr.e2e.v1;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -215,7 +215,7 @@ class ConstraintExceptionIT {
     }
 
     @Test
-    void sendRequest_WithLargeAttachment_andThrowConstraintException() throws Exception {
+    void sendRequest_WithLargeAttachment_AndGetBadResponse() throws Exception {
 
         StringBuilder fileContent = new StringBuilder("files");
         fileContent.append(FILE_CONTENT_SEPARATOR);
@@ -249,7 +249,7 @@ class ConstraintExceptionIT {
     }
 
     @Test
-    void sendRequest_WithNullAttachment_andThrowConstraintException() throws Exception {
+    void sendRequest_WithNullAttachment_AndGetBadResponse() throws Exception {
         String[] filesContent = IntStream.range(0, 7).mapToObj(ind -> {
             StringBuilder fileContent = new StringBuilder("files");
             fileContent.append(FILE_CONTENT_SEPARATOR);
@@ -322,4 +322,6 @@ class ConstraintExceptionIT {
                         jsonPath("$.response", nullValue())
                 );
     }
+
+
 }

@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import static javax.persistence.FetchType.LAZY;
-import static ru.opfr.notification.ApplicationConstants.*;
+import static ru.opfr.notification.ValidationMessages.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.*;
 
 @Getter

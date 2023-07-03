@@ -1,6 +1,6 @@
 package ru.opfr.notification;
 
-public class ApplicationConstants {
+public class ValidationMessages {
     public static final String NULL_REQUEST = "Null-request";
     public static final String NULL_TYPE = "Null-type";
     public static final String NO_STAGES = "No stages";
@@ -23,7 +23,7 @@ public class ApplicationConstants {
     public static final String FILES_SIZE_TOO_LARGE = "Large size of attachment";
 
 
-    private ApplicationConstants() {
+    private ValidationMessages() {
         throw new IllegalStateException("Constant class");
     }
 }

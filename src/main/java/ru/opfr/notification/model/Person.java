@@ -9,7 +9,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.util.Objects;
 
-import static ru.opfr.notification.ApplicationConstants.*;
+import static ru.opfr.notification.ValidationMessages.*;
 
 @Embeddable
 @NoArgsConstructor

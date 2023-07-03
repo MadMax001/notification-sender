@@ -3,7 +3,7 @@ package ru.opfr.notification.converters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
-import ru.opfr.notification.ApplicationConstants;
+import ru.opfr.notification.ValidationMessages;
 import ru.opfr.notification.exception.CreationNotificationException;
 import ru.opfr.notification.model.Notification;
 import ru.opfr.notification.model.NotificationTypeDictionary;
@@ -33,7 +33,7 @@ public class RequestNotificationConverterImpl implements RequestNotificationConv
 
     private void checkForNullRequest(Request request) throws CreationNotificationException {
         if (Objects.isNull(request))
-            throw new CreationNotificationException(ApplicationConstants.NULL_REQUEST);
+            throw new CreationNotificationException(ValidationMessages.NULL_REQUEST);
     }
 
     private Person createPerson(Request request) {

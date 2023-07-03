@@ -19,6 +19,7 @@ import ru.opfr.notification.NotificationSenderSecurityConfiguration;
 import ru.opfr.notification.model.NotificationProcessStageDictionary;
 import ru.opfr.notification.model.builders.NotificationTestBuilder;
 import ru.opfr.notification.service.NotificationService;
+import ru.opfr.notification.service.misc.ConstraintValidationExceptionService;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -33,7 +34,12 @@ import static ru.opfr.notification.model.NotificationProcessStageDictionary.RECE
 import static org.hamcrest.Matchers.*;
 
 @WebMvcTest
-@ContextConfiguration(classes={NotificationSenderSecurityConfiguration.class, ExceptionHandlerController.class, StatRestControllerV1.class})
+@ContextConfiguration(classes={
+        NotificationSenderSecurityConfiguration.class,
+        ExceptionHandlerController.class,
+        StatRestControllerV1.class,
+        ConstraintValidationExceptionService.class
+})
 @ActiveProfiles("repo_test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class StatRestControllerV1Test {

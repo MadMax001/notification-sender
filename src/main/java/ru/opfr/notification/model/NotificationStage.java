@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static javax.persistence.FetchType.LAZY;
-import static ru.opfr.notification.ApplicationConstants.*;
+import static ru.opfr.notification.ValidationMessages.*;
 
 @Getter
 @Setter

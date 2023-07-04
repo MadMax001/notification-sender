@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static javax.persistence.FetchType.EAGER;
 import static javax.persistence.FetchType.LAZY;
 import static ru.opfr.notification.ValidationMessages.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.*;
@@ -44,10 +45,10 @@ public class Notification {
     private NotificationTypeDictionary type;
 
     @NotEmptyCollection(message = NO_STAGES)
-    @OneToMany(fetch = LAZY, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = EAGER, mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationStage> stages = new ArrayList<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinFormula(value = "(SELECT stage.id FROM notification.notification_stage stage " +
             "WHERE stage.notification_id = id ORDER BY stage.id DESC LIMIT 1)", referencedColumnName = "id")
     private NotificationStage latest;

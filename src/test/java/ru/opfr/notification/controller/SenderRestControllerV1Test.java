@@ -217,7 +217,10 @@ class SenderRestControllerV1Test {
                 .andDo(print())
                 .andExpectAll(
                         status().isMethodNotAllowed(),
-                        jsonPath("$").doesNotExist()
+                        jsonPath("$.timestamp", notNullValue()),
+                        jsonPath("$.version", is("v1")),
+                        jsonPath("$.message", is("Request method 'PUT' not supported")),
+                        jsonPath("$.response", nullValue())
                 );
     }
 

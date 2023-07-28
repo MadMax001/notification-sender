@@ -9,9 +9,10 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
-import static java.util.Objects.nonNull;
 
 public class RunIfIPStartsCondition implements ExecutionCondition {
     @Override
@@ -21,15 +22,16 @@ public class RunIfIPStartsCondition implements ExecutionCondition {
         if (annotation == null) {
             throw new ExtensionConfigurationException("Could not find @" + RunIfIPStarts.class + " annotation on the method " + method);
         }
-        final String ip = getIP();
-        if (nonNull(ip) && ip.startsWith(annotation.value())) {
+        final List<String> ipList = getAllIP();
+        final boolean isAddressStartsWith = ipList.stream().anyMatch(ip -> ip.startsWith(annotation.value()));
+        if (isAddressStartsWith) {
             return ConditionEvaluationResult.enabled(String.format("IP starts with %s", annotation.value()));
         }
         return ConditionEvaluationResult.disabled(String.format("IP does not start with %s", annotation.value()));
     }
 
-    private String getIP() {
-        String ip = "";
+    private List<String> getAllIP() {
+        List<String> ipList = new ArrayList<>() ;
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -38,13 +40,13 @@ public class RunIfIPStartsCondition implements ExecutionCondition {
                     Enumeration<InetAddress> addresses = iface.getInetAddresses();
                     while (addresses.hasMoreElements()) {
                         InetAddress addr = addresses.nextElement();
-                        ip = addr.getHostAddress();
+                        ipList.add(addr.getHostAddress());
                     }
                 }
             }
         } catch (SocketException e) {
             throw new RuntimeException(e);
         }
-        return ip;
+        return ipList;
     }
 }

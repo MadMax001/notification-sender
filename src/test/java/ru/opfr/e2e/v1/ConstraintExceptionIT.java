@@ -1,23 +1,18 @@
 package ru.opfr.e2e.v1;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import ru.opfr.notification.AbstractContainersIntegrationTest;
 import ru.opfr.notification.NotificationSenderServiceApplication;
+import ru.opfr.notification.ObjectWriterConfiguration;
 import ru.opfr.notification.ValidationMessages;
 import ru.opfr.notification.model.builders.RequestTestBuilder;
 import ru.opfr.notification.model.dto.Request;
@@ -26,6 +21,7 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.Matchers.*;
 import static org.hamcrest.Matchers.is;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -33,29 +29,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static ru.opfr.notification.ValidationMessages.FILES_SIZE_TOO_LARGE;
 import static ru.opfr.notification.model.builders.RequestTestBuilder.FILE_CONTENT_SEPARATOR;
 
-@SpringBootTest(classes = NotificationSenderServiceApplication.class)
+@SpringBootTest(classes = {NotificationSenderServiceApplication.class, ObjectWriterConfiguration.class}, webEnvironment = RANDOM_PORT)
 @ActiveProfiles("repo_test")
+@AutoConfigureMockMvc
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class ConstraintExceptionIT {
-    private final WebApplicationContext context;
+class ConstraintExceptionIT extends AbstractContainersIntegrationTest {
+    private final MockMvc mockMvc;
 
-    MockMvc mockMvc;
-
-    ObjectWriter objectWriter;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectWriter = mapper.writer().withDefaultPrettyPrinter();
-
-    }
+    private final ObjectWriter objectWriter;
 
 
     @Test

@@ -33,7 +33,7 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ActiveProfiles({"tasks_test", "repo_test"})
+@ActiveProfiles({"tasks_test", "datasource_mock_test"})
 class LoggingInfoInSenderServiceFacadeAspectTest {
     @MockBean
     private final NotificationService notificationService;

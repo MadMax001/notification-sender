@@ -27,8 +27,8 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
 @SpringBootTest()
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ActiveProfiles({"repo_test"})
-class LoggingErrorInEmailSenderServiceAspectTest {
+@ActiveProfiles({"datasource_mock_test"})
+class LoggingErrorInEmailSenderServiceAspectIT {
     private final SenderServiceSafeWrapper senderServiceSafeWrapper;
 
     @MockBean

@@ -1,27 +1,21 @@
 package ru.opfr.notification.controller;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import ru.opfr.notification.NotificationSenderSecurityConfiguration;
+import ru.opfr.notification.ObjectWriterConfiguration;
 import ru.opfr.notification.exception.ApplicationRuntimeException;
 import ru.opfr.notification.model.builders.RequestTestBuilder;
 import ru.opfr.notification.model.dto.Request;
@@ -48,37 +42,24 @@ import static ru.opfr.notification.model.builders.RequestTestBuilder.FILE_CONTEN
                 NotificationSenderSecurityConfiguration.class,
                 SenderRestControllerV1.class,
                 ExceptionHandlerController.class,
-                ConstraintValidationExceptionService.class
+                ConstraintValidationExceptionService.class,
+                ObjectWriterConfiguration.class
         })
 @ActiveProfiles("repo_test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class SenderRestControllerV1Test {
-    private final WebApplicationContext context;
+@AutoConfigureMockMvc
+class SenderRestControllerV1IT {
 
     @MockBean
     SenderServiceFacadeSafeWrapper senderService;
 
-    MockMvc mockMvc;
+    private final MockMvc mockMvc;
 
-    ObjectWriter objectWriter;
+    private final ObjectWriter objectWriter;
 
 
     @Captor
     ArgumentCaptor<Request> requestArgumentCaptor;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders
-                .webAppContextSetup(context)
-                .apply(SecurityMockMvcConfigurers.springSecurity())
-                .build();
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(SerializationFeature.WRAP_ROOT_VALUE, false);
-        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        objectWriter = mapper.writer().withDefaultPrettyPrinter();
-
-    }
 
     @Test
     void sendRequestWithoutAttachments_andCheckResponse() throws Exception {

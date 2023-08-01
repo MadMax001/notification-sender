@@ -1,22 +1,19 @@
+server:
+    port:
+        ${SERVER_PORT}
 spring:
     profiles:
         active: prod
-#    datasource:
-#        driver-class-name: org.h2.Driver
-#        password: sa
-#        url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
-#        username: sa
-#    h2:
-#        console:
-#            path: /h2-console
-#            settings:
-#                trace: false
-#                web-allow-others: false
-#    jpa:
-#        database-platform: org.hibernate.dialect.H2Dialect
-#        properties:
-#            hibernate:
-#                format_sql: true
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: ${SPRING_DATASOURCE_URL}
+        username: ${SPRING_DATASOURCE_USERNAME}
+        password: ${SPRING_DATASOURCE_PASSWORD}
+    jpa:
+        hibernate:
+            ddl-auto:
+                validate
+        database-platform: org.hibernate.dialect.PostgreSQL10Dialect
     liquibase:
         enabled: true
         change-log: classpath:db/changelog/changelog.sql

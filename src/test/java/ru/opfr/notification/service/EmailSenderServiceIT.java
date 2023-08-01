@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import ru.opfr.notification.exception.SendNotificationException;
 import ru.opfr.notification.model.*;
 
@@ -29,9 +30,13 @@ import static org.mockito.Mockito.*;
 import static ru.opfr.notification.model.NotificationTypeDictionary.EMAIL;
 
 @SpringBootTest
+@TestPropertySource(properties = {
+        "spring.mail.host=10.73.0.0",
+        "app.mail.from=owner@server.info"
+})
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ActiveProfiles("repo_test")
-class EmailSenderServiceTest {
+@ActiveProfiles("datasource_mock_test")
+class EmailSenderServiceIT {
     final EmailSenderService emailSenderService;
 
     @MockBean

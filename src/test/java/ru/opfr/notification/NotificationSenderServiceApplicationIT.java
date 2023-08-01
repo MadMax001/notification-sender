@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
+import org.springframework.test.context.ActiveProfiles;
 import ru.opfr.notification.reporitory.NotificationAttachmentRepository;
 import ru.opfr.notification.reporitory.NotificationRepository;
 import ru.opfr.notification.reporitory.NotificationStageRepository;
@@ -15,8 +16,9 @@ import ru.opfr.notification.converters.RequestNotificationConverter;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@ActiveProfiles("datasource_mock_test")
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-class NotificationSenderServiceApplicationTests {
+class NotificationSenderServiceApplicationIT {
 	private final ApplicationContext context;
 
 	@Test

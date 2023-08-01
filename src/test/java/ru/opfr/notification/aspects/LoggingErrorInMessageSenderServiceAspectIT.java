@@ -30,8 +30,8 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.MESSAGE;
 
 @SpringBootTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
-@ActiveProfiles({"repo_test"})
-class LoggingErrorInMessageSenderServiceAspectTest {
+@ActiveProfiles({"datasource_mock_test"})
+class LoggingErrorInMessageSenderServiceAspectIT {
     private final SenderServiceSafeWrapper senderServiceSafeWrapper;
 
     @MockBean

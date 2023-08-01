@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
+import ru.opfr.notification.AbstractContainersIntegrationTest;
 import ru.opfr.notification.model.*;
 import ru.opfr.notification.model.builders.NotificationTestBuilder;
 
@@ -24,7 +25,7 @@ import static ru.opfr.notification.model.NotificationTypeDictionary.*;
 @DataJpaTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 @ActiveProfiles("repo_test")
-class NotificationRepositoryTest {
+class NotificationRepositoryIT extends AbstractContainersIntegrationTest {
 
     private final NotificationRepository notificationRepository;
 

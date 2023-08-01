@@ -32,7 +32,7 @@ public class AsyncWinMessageServiceImpl implements AsyncWinMessageService {
     }
 
     @Override
-    public CompletableFuture<WinConsoleExecuteResponse> send(Notification notification) throws IOException, InterruptedException {
+    public synchronized CompletableFuture<WinConsoleExecuteResponse> send(Notification notification) throws IOException, InterruptedException {
         if (!isWindows) {
             throw new ApplicationRuntimeException("The sending message process is implements on windows platform only!");
         }
